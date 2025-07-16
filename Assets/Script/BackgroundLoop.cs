@@ -8,7 +8,7 @@ public class BackgroundLoop : MonoBehaviour
     {
         //BoxCollider2D 컴포넌트를 가져와 배경의 너비를 설정
         BoxCollider2D backgroundCollider = GetComponent<BoxCollider2D>();
-        width = backgroundCollider.size.x;
+        width = backgroundCollider.size.x * 1.2f;
     }
 
     // Update is called once per frame
@@ -25,7 +25,7 @@ public class BackgroundLoop : MonoBehaviour
     //위치를 리셋하는 메서드
     private void Reposition()
     {
-        //현재 위치에서 오른쪽으로 가로길이 *2 만큼 이동
+        //현재 위치에서 오른쪽으로 가로길이 *3 만큼 이동
         Vector2 offset = new Vector2(width * 2f, 0f);
         transform.position = (Vector2)transform.position + offset;
     }
