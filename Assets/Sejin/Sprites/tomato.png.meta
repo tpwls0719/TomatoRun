@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: f5907b52097fefc47b8969c2a8972023
+guid: 0a767e0994cd6694fba5e7d34616be99
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 7780395835989405903
-    second: 1stage_1_0
+      213: -3962807554240710951
+    second: tomato_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -37,7 +37,7 @@ TextureImporter:
   maxTextureSize: 2048
   textureSettings:
     serializedVersion: 2
-    filterMode: 0
+    filterMode: 1
     aniso: 1
     mipBias: 0
     wrapU: 1
@@ -100,13 +100,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: 1stage_1_0
+      name: tomato_0
       rect:
         serializedVersion: 2
-        x: 0
-        y: 0
-        width: 1536
-        height: 864
+        x: 146
+        y: 220
+        width: 2070
+        height: 1959
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -115,8 +115,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: fc0b3106ac489fb60800000000000000
-      internalID: 7780395835989405903
+      spriteID: 9d67f3876874109c0800000000000000
+      internalID: -3962807554240710951
       vertices: []
       indices: 
       edges: []
@@ -135,7 +135,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      1stage_1_0: 7780395835989405903
+      tomato_0: -3962807554240710951
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
