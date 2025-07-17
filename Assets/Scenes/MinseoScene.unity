@@ -448,15 +448,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   waterDropPrefab: {fileID: 1426011090}
   pillPrefab: {fileID: 405168955}
+  waterDropSpawnChance: 0.7
+  pillSpawnChance: 0.1
+  itemHeightOffset: 1
+  itemSpacing: 1.5
+  minPlatformWidthForItems: 2
   waterDropPoolCount: 10
-  waterDropSpawnMin: 0.8
-  waterDropSpawnMax: 1.5
   pillPoolCount: 3
-  pillSpawnMin: 8
-  pillSpawnMax: 15
-  xPos: 18
-  yMin: -3
-  yMax: 1
   currentStage: 1
 --- !u!4 &186394837
 Transform:
@@ -466,12 +464,12 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 186394835}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 1.4537907, y: -0.37667057, z: 0.04504037}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 1.4537907, y: 1.6233294, z: 0.04504037}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 0}
+  m_Father: {fileID: 2096603740}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &330104370
 GameObject:
@@ -2123,12 +2121,14 @@ MonoBehaviour:
   stage4Platforms:
   - {fileID: 0}
   - {fileID: 0}
+  maxActivePlatforms: 4
   poolCount: 4
   timeBetSpawnMin: 1.25
   timeBetSpawnMax: 2.5
   yMin: -3.5
   yMax: 1.5
   xPos: 15
+  despawnXPos: -15
   currentStage: 1
 --- !u!4 &2096603740
 Transform:
@@ -2142,7 +2142,8 @@ Transform:
   m_LocalPosition: {x: 0, y: -2, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 186394837}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &2123686314
@@ -2267,6 +2268,5 @@ SceneRoots:
   - {fileID: 918522361}
   - {fileID: 824857113}
   - {fileID: 2096603740}
-  - {fileID: 186394837}
   - {fileID: 2134185066}
   - {fileID: 330104371}

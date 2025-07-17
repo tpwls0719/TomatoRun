@@ -86,7 +86,7 @@ public class ItemSpawner : MonoBehaviour
     }
     
     // 플랫폼이 생성될 때 호출되는 메서드 (PlatformSpawner에서 호출)
-    public void SpawnItemsOnPlatform(Vector2 platformPosition, Vector2 platformSize)
+    public void SpawnItemsOnPlatform(Vector2 platformPosition, Vector2 platformSize, GameObject platform)
     {
         // 플랫폼이 너무 작으면 아이템 스폰 안함
         if (platformSize.x < minPlatformWidthForItems) return;
@@ -95,16 +95,16 @@ public class ItemSpawner : MonoBehaviour
         int maxItems = Mathf.FloorToInt(platformSize.x / itemSpacing);
         maxItems = Mathf.Clamp(maxItems, 1, 5); // 최소 1개, 최대 5개
         
-        // 플랫폼의 왼쪽 끝 위치 계산
-        float leftEdge = platformPosition.x - (platformSize.x / 2f);
-        float itemY = platformPosition.y + (platformSize.y / 2f) + itemHeightOffset;
+        // 플랫폼 로컬 좌표계에서 아이템 위치 계산
+        float platformWidth = platformSize.x;
+        float itemY = (platformSize.y / 2f) + itemHeightOffset;
         
         // 각 위치에 확률적으로 아이템 스폰
         for (int i = 0; i < maxItems; i++)
         {
-            // 아이템 X 위치 계산 (플랫폼을 균등하게 나눔)
-            float itemX = leftEdge + ((platformSize.x / (maxItems + 1)) * (i + 1));
-            Vector2 itemPosition = new Vector2(itemX, itemY);
+            // 아이템 로컬 X 위치 계산 (플랫폼 중심 기준)
+            float itemLocalX = -(platformWidth / 2f) + ((platformWidth / (maxItems + 1)) * (i + 1));
+            Vector2 itemLocalPosition = new Vector2(itemLocalX, itemY);
             
             // 확률에 따라 아이템 스폰
             float randomValue = Random.Range(0f, 1f);
@@ -112,12 +112,12 @@ public class ItemSpawner : MonoBehaviour
             if (randomValue < pillSpawnChance && pillSpawnedThisStage < maxPillsPerStage)
             {
                 // 알약 스폰 (우선순위가 높음)
-                SpawnPillAtPosition(itemPosition);
+                SpawnPillAtPosition(itemLocalPosition, platform);
             }
             else if (randomValue < waterDropSpawnChance + pillSpawnChance)
             {
                 // 물방울 스폰
-                SpawnWaterDropAtPosition(itemPosition);
+                SpawnWaterDropAtPosition(itemLocalPosition, platform);
             }
             // 그 외에는 해당 위치에 아이템 스폰 안함
         }
@@ -126,16 +126,57 @@ public class ItemSpawner : MonoBehaviour
     // 기존 메서드도 유지 (호환성을 위해)
     public void SpawnItemOnPlatform(Vector2 platformPosition, Vector2 platformSize)
     {
-        SpawnItemsOnPlatform(platformPosition, platformSize);
+        // 기존 방식으로 월드 좌표에 아이템 스폰 (스크롤 미지원)
+        Debug.LogWarning("SpawnItemOnPlatform: 플랫폼 참조 없이 호출됨. 스크롤 기능이 제대로 작동하지 않을 수 있습니다.");
+        
+        // 플랫폼이 너무 작으면 아이템 스폰 안함
+        if (platformSize.x < minPlatformWidthForItems) return;
+        
+        // 플랫폼 너비에 따라 스폰할 아이템 개수 계산
+        int maxItems = Mathf.FloorToInt(platformSize.x / itemSpacing);
+        maxItems = Mathf.Clamp(maxItems, 1, 5);
+        
+        // 플랫폼의 왼쪽 끝 위치 계산
+        float leftEdge = platformPosition.x - (platformSize.x / 2f);
+        float itemY = platformPosition.y + (platformSize.y / 2f) + itemHeightOffset;
+        
+        // 각 위치에 확률적으로 아이템 스폰
+        for (int i = 0; i < maxItems; i++)
+        {
+            float itemX = leftEdge + ((platformSize.x / (maxItems + 1)) * (i + 1));
+            Vector2 itemPosition = new Vector2(itemX, itemY);
+            
+            float randomValue = Random.Range(0f, 1f);
+            
+            if (randomValue < pillSpawnChance && pillSpawnedThisStage < maxPillsPerStage)
+            {
+                SpawnPillAtPosition(itemPosition, null);
+            }
+            else if (randomValue < waterDropSpawnChance + pillSpawnChance)
+            {
+                SpawnWaterDropAtPosition(itemPosition, null);
+            }
+        }
     }
     
-    void SpawnWaterDropAtPosition(Vector2 position)
+    void SpawnWaterDropAtPosition(Vector2 position, GameObject parentPlatform)
     {
         if (waterDropPool == null || waterDropPool.Length == 0) return;
         
         GameObject waterDrop = waterDropPool[waterDropIndex];
         
-        waterDrop.transform.position = position;
+        // 플랫폼이 있으면 자식으로 설정, 없으면 월드 좌표
+        if (parentPlatform != null)
+        {
+            waterDrop.transform.SetParent(parentPlatform.transform, false);
+            waterDrop.transform.localPosition = position;
+        }
+        else
+        {
+            waterDrop.transform.SetParent(null);
+            waterDrop.transform.position = position;
+        }
+        
         waterDrop.SetActive(false);
         waterDrop.SetActive(true);
         
@@ -146,16 +187,27 @@ public class ItemSpawner : MonoBehaviour
             waterDropIndex = 0;
         }
         
-        Debug.Log($"물방울 스폰 at {position}");
+        Debug.Log($"물방울 스폰 at {position} (Parent: {(parentPlatform != null ? parentPlatform.name : "World")})");
     }
     
-    void SpawnPillAtPosition(Vector2 position)
+    void SpawnPillAtPosition(Vector2 position, GameObject parentPlatform)
     {
         if (pillPool == null || pillPool.Length == 0) return;
         
         GameObject pill = pillPool[pillIndex];
         
-        pill.transform.position = position;
+        // 플랫폼이 있으면 자식으로 설정, 없으면 월드 좌표
+        if (parentPlatform != null)
+        {
+            pill.transform.SetParent(parentPlatform.transform, false);
+            pill.transform.localPosition = position;
+        }
+        else
+        {
+            pill.transform.SetParent(null);
+            pill.transform.position = position;
+        }
+        
         pill.SetActive(false);
         pill.SetActive(true);
         
@@ -169,7 +221,7 @@ public class ItemSpawner : MonoBehaviour
             pillIndex = 0;
         }
         
-        Debug.Log($"스테이지 {currentStage}: 알약 {pillSpawnedThisStage}/{maxPillsPerStage} 스폰 at {position}");
+        Debug.Log($"스테이지 {currentStage}: 알약 {pillSpawnedThisStage}/{maxPillsPerStage} 스폰 at {position} (Parent: {(parentPlatform != null ? parentPlatform.name : "World")})");
     }
     
     // 스테이지 변경 시 호출
@@ -214,7 +266,7 @@ public class ItemSpawner : MonoBehaviour
     public void TestSpawnWaterDrop()
     {
         Vector2 testPos = new Vector2(Random.Range(5f, 15f), Random.Range(-2f, 2f));
-        SpawnWaterDropAtPosition(testPos);
+        SpawnWaterDropAtPosition(testPos, null);
     }
     
     [ContextMenu("테스트: 랜덤 위치에 알약 스폰")]
@@ -223,7 +275,7 @@ public class ItemSpawner : MonoBehaviour
         if (pillSpawnedThisStage < maxPillsPerStage)
         {
             Vector2 testPos = new Vector2(Random.Range(5f, 15f), Random.Range(-2f, 2f));
-            SpawnPillAtPosition(testPos);
+            SpawnPillAtPosition(testPos, null);
         }
         else
         {
