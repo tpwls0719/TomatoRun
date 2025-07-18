@@ -83,14 +83,19 @@ public class PlatformSpawner : MonoBehaviour
             // 현재 순번의 발판을 화면 오른쪽으로 재배치
             platforms[currentIndex].transform.position = new Vector2(xPos, yPos);
 
-            // 아이템 스폰
+            // 장애물 스폰 (확률적으로) - 아이템보다 먼저 스폰
+            SpawnObstacle(platforms[currentIndex]);
+
+            // 아이템 스폰 - 장애물 스폰 후에 호출
             if (ItemSpawner.Instance != null)
             {
-                ItemSpawner.Instance.SpawnItemsOnPlatform(platforms[currentIndex]);
+                // 플랫폼 위치와 크기 정보 전달
+                Vector2 platformPos = platforms[currentIndex].transform.position;
+                Collider2D platformCol = platforms[currentIndex].GetComponent<Collider2D>();
+                Vector2 platformSize = platformCol ? platformCol.bounds.size : Vector2.one;
+                
+                ItemSpawner.Instance.SpawnItemsOnPlatform(platformPos, platformSize, platforms[currentIndex]);
             }
-
-            // 장애물 스폰 (확률적으로)
-            SpawnObstacle(platforms[currentIndex]);
 
             // 순번 넘기기
             currentIndex++;

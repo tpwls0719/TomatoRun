@@ -6,110 +6,97 @@ public class ItemSpawner : MonoBehaviour
     public GameObject waterDropPrefab;
     public GameObject pillPrefab;
 
-    [Header("스폰 설정")]
-    public int count = 30; // 풀링 수
-    public float pillSpawnChance = 0.15f; // 알약 스폰 확률 (15%)
+    [Header("아이템 스폰 확률")]
+    [Range(0f, 1f)]
+    public float waterDropSpawnChance = 0.7f;
+    [Range(0f, 1f)]
+    public float pillSpawnChance = 0.1f;
 
-    private GameObject[] waterDrops;
-    private GameObject[] pills;
-    private int currentIndex = 0;
-    private int currentPillIndex = 0;
-    private Vector2 poolPosition = new Vector2(0, 25f); // 풀링 대기 위치
+    [Header("위치 설정")]
+    public float itemHeightOffset = 1f;
+    public float itemSpacing = 1.5f;
+    public float minPlatformWidthForItems = 2f;
+
+    [Header("풀 개수")]
+    public int waterDropPoolCount = 15;
+    public int pillPoolCount = 5;
+
+    [Header("스테이지 설정")]
+    public int currentStage = 1;
+    private int pillSpawnedThisStage = 0;
+    private int maxPillsPerStage = 3;
+
+    private GameObject[] waterDropPool;
+    private GameObject[] pillPool;
+    private int waterDropIndex = 0;
+    private int pillIndex = 0;
 
     public static ItemSpawner Instance { get; private set; }
 
-    void Awake()
+    private void Awake()
     {
-        Instance = this;
+        if (Instance == null) Instance = this;
+        else Destroy(gameObject);
     }
 
-    void Start()
+    private void Start()
     {
-        Debug.Log($"[ItemSpawner] 초기화 시작 - waterDropPrefab: {waterDropPrefab}, pillPrefab: {pillPrefab}");
-        
+        InitializePools();
+    }
+
+    void InitializePools()
+    {
         // 물방울 풀 생성
-        if (waterDropPrefab == null)
+        waterDropPool = new GameObject[waterDropPoolCount];
+        for (int i = 0; i < waterDropPoolCount; i++)
         {
-            Debug.LogError("[ItemSpawner] waterDropPrefab이 null입니다! Inspector에서 설정해주세요.");
-            return;
-        }
-        
-        waterDrops = new GameObject[count];
-        for (int i = 0; i < count; i++)
-        {
-            waterDrops[i] = Instantiate(waterDropPrefab, poolPosition, Quaternion.identity);
-            waterDrops[i].SetActive(false);
+            waterDropPool[i] = Instantiate(waterDropPrefab);
+            waterDropPool[i].transform.position = new Vector3(1000f, 1000f, 0f); // 화면 밖으로
+            waterDropPool[i].SetActive(false);
         }
 
         // 알약 풀 생성
         if (pillPrefab != null)
         {
-            pills = new GameObject[count / 3]; // 물방울보다 적게
-            for (int i = 0; i < pills.Length; i++)
+            pillPool = new GameObject[pillPoolCount];
+            for (int i = 0; i < pillPoolCount; i++)
             {
-                pills[i] = Instantiate(pillPrefab, poolPosition, Quaternion.identity);
-                pills[i].SetActive(false);
+                pillPool[i] = Instantiate(pillPrefab);
+                pillPool[i].transform.position = new Vector3(1000f, 1000f, 0f); // 화면 밖으로
+                pillPool[i].SetActive(false);
             }
-            Debug.Log($"[ItemSpawner] 알약 풀 생성됨: {pills.Length}개");
         }
         
-        Debug.Log($"[ItemSpawner] 초기화 완료 - 물방울: {waterDrops.Length}개, 알약: {(pills?.Length ?? 0)}개");
+        Debug.Log($"[ItemSpawner] 풀 초기화 완료 - 물방울: {waterDropPoolCount}개, 알약: {(pillPool?.Length ?? 0)}개");
     }
 
-    public void SpawnItemsOnPlatform(GameObject platform)
+    public void SpawnItemsOnPlatform(Vector2 platformPosition, Vector2 platformSize, GameObject platform)
     {
-        Debug.Log($"[ItemSpawner] 스폰 요청됨 - 플랫폼: {platform.name}");
+        Debug.Log($"[ItemSpawner] 스폰 요청 - 플랫폼: {platform.name}, 크기: {platformSize}");
         
-        if (waterDrops == null || waterDrops.Length == 0)
+        if (platformSize.x < minPlatformWidthForItems) 
         {
-            Debug.LogError("[ItemSpawner] waterDrops 배열이 null이거나 비어있습니다!");
+            Debug.Log($"[ItemSpawner] 플랫폼이 너무 작음 - 최소 크기: {minPlatformWidthForItems}");
             return;
         }
-        
-        Collider2D platformCol = platform.GetComponent<Collider2D>();
-        if (platformCol == null) 
-        {
-            Debug.LogError($"[ItemSpawner] 플랫폼 {platform.name}에 Collider2D가 없습니다!");
-            return;
-        }
-
-        float platformWidth = platformCol.bounds.size.x;
-        Debug.Log($"[ItemSpawner] 플랫폼 크기: {platformWidth}");
 
         // 플랫폼에 있는 장애물 찾기
         Transform obstacle = FindObstacleOnPlatform(platform);
         
-        // 샘플 아이템 크기 측정
-        GameObject sample = waterDrops[0];
-        if (sample == null)
-        {
-            Debug.LogError("[ItemSpawner] 첫 번째 물방울이 null입니다!");
-            return;
-        }
-        
-        sample.SetActive(true);
-        Collider2D itemCol = sample.GetComponent<Collider2D>();
-        float itemWidth = itemCol ? itemCol.bounds.size.x : 1f;
-        float itemHeight = itemCol ? itemCol.bounds.size.y : 1f;
-        sample.SetActive(false);
-        
-        Debug.Log($"[ItemSpawner] 아이템 크기: {itemWidth} x {itemHeight}");
-
-        // 장애물이 있으면 좌우로 분할해서 배치, 없으면 전체에 배치
         if (obstacle != null)
         {
-            Debug.Log($"[ItemSpawner] 장애물 발견: {obstacle.name}");
-            SpawnItemsAroundObstacle(platform, obstacle, platformWidth, itemWidth, itemHeight);
+            Debug.Log($"[ItemSpawner] 장애물 발견: {obstacle.name} - 쿠키런 스타일 배치");
+            // 쿠키런 스타일: 장애물 위와 주변에 아이템 배치
+            SpawnItemsCookieRunStyle(platform, obstacle, platformSize);
         }
         else
         {
             Debug.Log("[ItemSpawner] 장애물 없음 - 전체 배치");
-            SpawnItemsOnFullPlatform(platform, platformWidth, itemWidth, itemHeight);
+            // 기존 방식: 플랫폼 전체에 균등 배치
+            SpawnItemsOnFullPlatform(platform, platformSize);
         }
-
-        Debug.Log($"[스폰 완료] 플랫폼에 아이템 배치됨 (장애물 {(obstacle != null ? "있음" : "없음")})");
     }
-
+    
     Transform FindObstacleOnPlatform(GameObject platform)
     {
         // 플랫폼의 자식 중에서 장애물 찾기
@@ -123,96 +110,135 @@ public class ItemSpawner : MonoBehaviour
         }
         return null;
     }
-
-    void SpawnItemsOnFullPlatform(GameObject platform, float platformWidth, float itemWidth, float itemHeight)
-    {
-        float spacing = itemWidth * 0.1f;
-        int maxItems = Mathf.FloorToInt(platformWidth / (itemWidth + spacing));
-        maxItems = Mathf.Max(maxItems, 1);
-
-        SpawnItemsInRow(platform, maxItems, 0f, itemWidth, itemHeight, spacing);
-    }
-
-    void SpawnItemsAroundObstacle(GameObject platform, Transform obstacle, float platformWidth, float itemWidth, float itemHeight)
+    
+    void SpawnItemsCookieRunStyle(GameObject platform, Transform obstacle, Vector2 platformSize)
     {
         Collider2D obstacleCol = obstacle.GetComponent<Collider2D>();
         if (obstacleCol == null) return;
-
+        
         float obstacleWidth = obstacleCol.bounds.size.x;
-        float obstacleLocalX = obstacle.localPosition.x;
+        float obstacleHeight = obstacleCol.bounds.size.y;
+        float obstacleX = obstacle.localPosition.x;
+        float obstacleY = obstacle.localPosition.y;
         
-        float spacing = itemWidth * 0.1f;
+        Debug.Log($"[배치] 장애물 정보 - 위치: ({obstacleX}, {obstacleY}), 크기: {obstacleWidth}x{obstacleHeight}");
         
-        // 좌측 영역
-        float leftAreaWidth = (platformWidth / 2f) + obstacleLocalX - (obstacleWidth / 2f) - spacing;
-        if (leftAreaWidth > itemWidth)
+        // 1. 장애물 위에 아이템 배치 (쿠키런 스타일)
+        Vector2 topPosition = new Vector2(obstacleX, obstacleY + (obstacleHeight / 2f) + 0.5f);
+        Debug.Log($"[배치] 장애물 위 아이템 위치: {topPosition}");
+        SpawnSingleItem(topPosition, platform);
+        
+        // 2. 플랫폼 좌측에 아이템 2개
+        float leftX1 = -(platformSize.x / 2f) + 1f;
+        float leftX2 = -(platformSize.x / 2f) + 2.5f;
+        float platformY = (platformSize.y / 2f) + itemHeightOffset;
+        
+        if (leftX2 < obstacleX - (obstacleWidth / 2f) - 0.5f)
         {
-            int leftItems = Mathf.FloorToInt(leftAreaWidth / (itemWidth + spacing));
-            if (leftItems > 0)
-            {
-                float leftCenterX = -(platformWidth / 4f) + (obstacleLocalX - obstacleWidth / 2f) / 2f;
-                SpawnItemsInRow(platform, leftItems, leftCenterX, itemWidth, itemHeight, spacing);
-            }
+            SpawnSingleItem(new Vector2(leftX1, platformY), platform);
+            SpawnSingleItem(new Vector2(leftX2, platformY), platform);
+            Debug.Log($"[배치] 좌측 아이템 - ({leftX1}, {platformY}), ({leftX2}, {platformY})");
         }
-
-        // 우측 영역
-        float rightAreaWidth = (platformWidth / 2f) - obstacleLocalX - (obstacleWidth / 2f) - spacing;
-        if (rightAreaWidth > itemWidth)
+        
+        // 3. 플랫폼 우측에 아이템 2개
+        float rightX1 = (platformSize.x / 2f) - 2.5f;
+        float rightX2 = (platformSize.x / 2f) - 1f;
+        
+        if (rightX1 > obstacleX + (obstacleWidth / 2f) + 0.5f)
         {
-            int rightItems = Mathf.FloorToInt(rightAreaWidth / (itemWidth + spacing));
-            if (rightItems > 0)
-            {
-                float rightCenterX = (platformWidth / 4f) + (obstacleLocalX + obstacleWidth / 2f) / 2f;
-                SpawnItemsInRow(platform, rightItems, rightCenterX, itemWidth, itemHeight, spacing);
-            }
+            SpawnSingleItem(new Vector2(rightX1, platformY), platform);
+            SpawnSingleItem(new Vector2(rightX2, platformY), platform);
+            Debug.Log($"[배치] 우측 아이템 - ({rightX1}, {platformY}), ({rightX2}, {platformY})");
+        }
+    }
+    
+    void SpawnItemsOnFullPlatform(GameObject platform, Vector2 platformSize)
+    {
+        int maxItems = Mathf.FloorToInt(platformSize.x / itemSpacing);
+        maxItems = Mathf.Clamp(maxItems, 1, 5);
+
+        float itemY = (platformSize.y / 2f) + itemHeightOffset;
+
+        for (int i = 0; i < maxItems; i++)
+        {
+            float itemLocalX = -(platformSize.x / 2f) + ((platformSize.x / (maxItems + 1)) * (i + 1));
+            Vector2 itemLocalPosition = new Vector2(itemLocalX, itemY);
+            SpawnSingleItem(itemLocalPosition, platform);
+        }
+    }
+    
+    void SpawnSingleItem(Vector2 localPosition, GameObject parentPlatform)
+    {
+        float rand = Random.value;
+
+        if (rand < pillSpawnChance && pillSpawnedThisStage < maxPillsPerStage)
+        {
+            SpawnPillAtPosition(localPosition, parentPlatform);
+        }
+        else if (rand < pillSpawnChance + waterDropSpawnChance)
+        {
+            SpawnWaterDropAtPosition(localPosition, parentPlatform);
         }
     }
 
-    void SpawnItemsInRow(GameObject platform, int itemCount, float centerX, float itemWidth, float itemHeight, float spacing)
+    void SpawnWaterDropAtPosition(Vector2 localPosition, GameObject parentPlatform)
     {
-        Debug.Log($"[ItemSpawner] 행 스폰 시작 - 아이템 수: {itemCount}, 중심X: {centerX}");
+        if (waterDropPool == null || waterDropPool.Length == 0) return;
+
+        GameObject drop = waterDropPool[waterDropIndex];
+
+        // 부모 설정과 위치 조정
+        drop.transform.SetParent(parentPlatform.transform, false);
+        drop.transform.localPosition = localPosition;
         
-        Collider2D platformCol = platform.GetComponent<Collider2D>();
+        // 활성화
+        drop.SetActive(true);
         
-        for (int i = 0; i < itemCount; i++)
+        Debug.Log($"[ItemSpawner] 물방울 스폰됨 - 위치: {localPosition}, 부모: {parentPlatform.name}");
+
+        waterDropIndex = (waterDropIndex + 1) % waterDropPoolCount;
+    }
+
+    void SpawnPillAtPosition(Vector2 localPosition, GameObject parentPlatform)
+    {
+        if (pillPool == null || pillPool.Length == 0) return;
+
+        GameObject pill = pillPool[pillIndex];
+
+        // 부모 설정과 위치 조정
+        pill.transform.SetParent(parentPlatform.transform, false);
+        pill.transform.localPosition = localPosition;
+        
+        // 활성화
+        pill.SetActive(true);
+        
+        Debug.Log($"[ItemSpawner] 알약 스폰됨 - 위치: {localPosition}, 부모: {parentPlatform.name}");
+
+        pillSpawnedThisStage++;
+        pillIndex = (pillIndex + 1) % pillPoolCount;
+    }
+
+    public void ChangeStage(int newStage)
+    {
+        if (newStage >= 1 && newStage <= 4)
         {
-            // 확률적으로 물방울 또는 알약 선택
-            bool spawnPill = (Random.Range(0f, 1f) < pillSpawnChance) && (pills != null);
-            
-            GameObject item;
-            if (spawnPill && currentPillIndex < pills.Length)
-            {
-                item = pills[currentPillIndex];
-                currentPillIndex = (currentPillIndex + 1) % pills.Length;
-                Debug.Log($"[ItemSpawner] 알약 스폰 - 인덱스: {currentPillIndex}");
-            }
-            else
-            {
-                item = waterDrops[currentIndex];
-                currentIndex = (currentIndex + 1) % count;
-                Debug.Log($"[ItemSpawner] 물방울 스폰 - 인덱스: {currentIndex}");
-            }
-            
-            if (item == null)
-            {
-                Debug.LogError($"[ItemSpawner] 아이템이 null입니다! (인덱스: {i})");
-                continue;
-            }
-            
-            item.SetActive(false);
-            item.SetActive(true);
-            item.transform.SetParent(platform.transform);
-
-            // 위치 계산
-            float totalWidth = itemCount * (itemWidth + spacing) - spacing;
-            float startX = centerX - totalWidth / 2f + itemWidth / 2f;
-            float x = startX + i * (itemWidth + spacing);
-            float y = (platformCol.bounds.size.y / 2f) + (itemHeight / 2f) + 0.5f;
-
-            item.transform.localPosition = new Vector3(x, y, 0);
-            Debug.Log($"[ItemSpawner] 아이템 {i} 배치 완료 - 위치: ({x}, {y})");
+            currentStage = newStage;
+            pillSpawnedThisStage = 0;
+            Debug.Log($"[스테이지 변경] 현재 스테이지: {currentStage}, 알약 리셋됨");
         }
-        
-        Debug.Log($"[ItemSpawner] 행 스폰 완료 - {itemCount}개 아이템");
+    }
+
+    public void RestartGame()
+    {
+        currentStage = 1;
+        pillSpawnedThisStage = 0;
+        waterDropIndex = 0;
+        pillIndex = 0;
+
+        foreach (GameObject obj in waterDropPool)
+            if (obj != null) obj.SetActive(false);
+
+        foreach (GameObject obj in pillPool)
+            if (obj != null) obj.SetActive(false);
     }
 }
