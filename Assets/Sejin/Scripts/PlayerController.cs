@@ -13,13 +13,17 @@ public class PlayerController : MonoBehaviour
     private Rigidbody2D playerRigidbody;
     private Animator animator;
     private AudioSource playerAudio;
-
+    
+    public int maxHealth = 3;
+    private int currentHealth;
     void Start()
     {
         //게임 오브젝트로부터 사용할 컴포넌트들을 가져와 변수에 할당
         playerRigidbody = GetComponent<Rigidbody2D>();
         animator = GetComponent<Animator>();
-        playerAudio = GetComponent<AudioSource>();
+        //playerAudio = GetComponent<AudioSource>();
+
+        currentHealth = maxHealth;
     }
 
     // Update is called once per frame
@@ -41,13 +45,7 @@ public class PlayerController : MonoBehaviour
             //리지드바디에 위쪽으로 힘을 주기
             playerRigidbody.AddForce(new Vector2(0, jumpForce));
             //오디오 소스 재생
-            playerAudio.Play();
-        }
-        else if (Input.GetMouseButtonUp(0) && playerRigidbody.linearVelocity.y > 0)
-        {
-            //마우스 왼쪽 버튼에서 손을 떼는 순간 그리고 속도의 y 값이 양수라면 (위로 상승)
-            //현재 속도를 절반으로 변경
-            playerRigidbody.linearVelocity = playerRigidbody.linearVelocity * 0.5f; // Reduce upward velocity when mouse button is released
+            //playerAudio.Play();
         }
         //애니메이터의 Grounded 파라미터를 isGrounded 값으로 갱신
         animator.SetBool("Grounded", isGrounded);
@@ -72,12 +70,28 @@ public class PlayerController : MonoBehaviour
         //GameManager.instance.OnPlayerDead();
     }
 
+    private void TakeDamage(int damage)
+    {
+        currentHealth -= damage;
+        Debug.Log("데미지! 현재 체력: " + currentHealth);
+
+        if (currentHealth <= 0)
+        {
+            Die();
+        }
+    }
+
     private void OnTriggerEnter2D(Collider2D other)
     {
         if (other.tag == "Dead" && !isDead)
         {
             // 충돌한 상대방의 태그가 Dead이며 아직 사망하지 않았다면 Die() 실행
+            Debug.Log("죽음");
             Die();
+        }
+        else if (other.tag == "Hit" && !isDead)
+        {
+            TakeDamage(1); // 체력 1 깎기
         }
     }
 
