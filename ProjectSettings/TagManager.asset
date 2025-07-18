@@ -6,6 +6,7 @@ TagManager:
   tags:
   - Dead
   - Item
+  - Hit
   layers:
   - Default
   - TransparentFX
