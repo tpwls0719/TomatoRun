@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class BackgroundLoop : MonoBehaviour
+public class BackGroundLoopStage3 : MonoBehaviour
 {
     private float width; // 배경의 너비
 
@@ -8,7 +8,7 @@ public class BackgroundLoop : MonoBehaviour
     {
         //BoxCollider2D 컴포넌트를 가져와 배경의 너비를 설정
         BoxCollider2D backgroundCollider = GetComponent<BoxCollider2D>();
-        width = backgroundCollider.size.x * 1.2f;
+        width = backgroundCollider.size.x;
     }
 
     // Update is called once per frame
