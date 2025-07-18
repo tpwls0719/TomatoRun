@@ -1,0 +1,347 @@
+fileFormatVersion: 2
+guid: ebfc9918791e2ef4899db68624ee30a4
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: 7313197392418931526
+    second: Tomato_run_0
+  - first:
+      213: 2779610957983949049
+    second: Tomato_run_1
+  - first:
+      213: -8085280335423292632
+    second: Tomato_run_2
+  - first:
+      213: -5919646323193730183
+    second: Tomato_run_3
+  - first:
+      213: 5786998753269250712
+    second: Tomato_run_4
+  - first:
+      213: 979789551967108563
+    second: Tomato_run_5
+  - first:
+      213: -1156591763491555753
+    second: Tomato_run_6
+  - first:
+      213: 630062956616317652
+    second: Tomato_run_7
+  - first:
+      213: 8504799107433269494
+    second: Tomato_run_8
+  - first:
+      213: 6091626745942991635
+    second: Tomato_run_9
+  - first:
+      213: 4201389030131390448
+    second: Tomato_run_10
+  - first:
+      213: -1435857019095646802
+    second: Tomato_run_11
+  - first:
+      213: 6422348961469713612
+    second: Tomato_run_12
+  - first:
+      213: 2366801780856740366
+    second: Tomato_run_13
+  - first:
+      213: 3000008390151033226
+    second: Tomato_run_14
+  - first:
+      213: -5698717015154045858
+    second: Tomato_run_15
+  - first:
+      213: -3474192595887434303
+    second: Tomato_run_16
+  - first:
+      213: 4556859871382503346
+    second: Tomato_run_17
+  - first:
+      213: 1939027276599253788
+    second: Tomato_run_18
+  - first:
+      213: -8190489690143719049
+    second: Tomato_run_19
+  - first:
+      213: -4178818060301814563
+    second: Tomato_run_20
+  - first:
+      213: -8863737119296625372
+    second: Tomato_run_21
+  - first:
+      213: -4898160749754957870
+    second: Tomato_run_22
+  - first:
+      213: -8778439076441248183
+    second: Tomato_run_23
+  - first:
+      213: -5467315114951906802
+    second: Tomato_run_24
+  - first:
+      213: 3039165418358944299
+    second: Tomato_run_25
+  - first:
+      213: -8183427404158642626
+    second: Tomato_run_26
+  - first:
+      213: -5704972719250578544
+    second: Tomato_run_27
+  - first:
+      213: 2302245909365163451
+    second: Tomato_run_28
+  - first:
+      213: 4093388159089806363
+    second: Tomato_run_29
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: Tomato_run_1
+      rect:
+        serializedVersion: 2
+        x: 615
+        y: 272
+        width: 316
+        height: 514
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9f0aa647079239620800000000000000
+      internalID: 2779610957983949049
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Tomato_run_2
+      rect:
+        serializedVersion: 2
+        x: 930
+        y: 271
+        width: 309
+        height: 513
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 82bb4a16f505bcf80800000000000000
+      internalID: -8085280335423292632
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Tomato_run_3
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 273
+        width: 302
+        height: 515
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ea201ea448b93ff4a88ea91fd4c18794
+      internalID: -5919646323193730183
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Tomato_run_4
+      rect:
+        serializedVersion: 2
+        x: 303
+        y: 272
+        width: 308
+        height: 514
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 71b0fa540c1164044b052a3358d6f2dc
+      internalID: 5786998753269250712
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Tomato_run_5
+      rect:
+        serializedVersion: 2
+        x: 1238
+        y: 272
+        width: 297
+        height: 514
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 03827982b11308546a38bbdcb01fa0c7
+      internalID: 979789551967108563
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 668e86ae27343aa4a889d0a64047cff8
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      Tomato_run_0: 7313197392418931526
+      Tomato_run_1: 2779610957983949049
+      Tomato_run_10: 4201389030131390448
+      Tomato_run_11: -1435857019095646802
+      Tomato_run_12: 6422348961469713612
+      Tomato_run_13: 2366801780856740366
+      Tomato_run_14: 3000008390151033226
+      Tomato_run_15: -5698717015154045858
+      Tomato_run_16: -3474192595887434303
+      Tomato_run_17: 4556859871382503346
+      Tomato_run_18: 1939027276599253788
+      Tomato_run_19: -8190489690143719049
+      Tomato_run_2: -8085280335423292632
+      Tomato_run_20: -4178818060301814563
+      Tomato_run_21: -8863737119296625372
+      Tomato_run_22: -4898160749754957870
+      Tomato_run_23: -8778439076441248183
+      Tomato_run_24: -5467315114951906802
+      Tomato_run_25: 3039165418358944299
+      Tomato_run_26: -8183427404158642626
+      Tomato_run_27: -5704972719250578544
+      Tomato_run_28: 2302245909365163451
+      Tomato_run_29: 4093388159089806363
+      Tomato_run_3: -5919646323193730183
+      Tomato_run_4: 5786998753269250712
+      Tomato_run_5: 979789551967108563
+      Tomato_run_6: -1156591763491555753
+      Tomato_run_7: 630062956616317652
+      Tomato_run_8: 8504799107433269494
+      Tomato_run_9: 6091626745942991635
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
