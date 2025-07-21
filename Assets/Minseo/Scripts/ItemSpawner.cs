@@ -1,6 +1,5 @@
 using UnityEngine;
 using System.Collections.Generic;
-using System.Linq;
 
 public class ItemSpawner : MonoBehaviour
 {
@@ -18,8 +17,8 @@ public class ItemSpawner : MonoBehaviour
     public float sunlightSpawnChance = 0.2f;
 
     [Header("스폰 높이 오프셋")]
-    public float itemHeightOffset = 0.2f;
-    public float minPlatformWidthForItems = 2.0f;
+    public float itemHeightOffset = 0.4f;  // 픽셀 유닛 변경으로 2배 증가
+    public float minPlatformWidthForItems = 4.0f;  // 픽셀 유닛 변경으로 2배 증가
 
     [Header("풀 개수")]
     public int waterDropPoolCount = 30;
@@ -158,12 +157,12 @@ public class ItemSpawner : MonoBehaviour
         }
     }
 
-    // 장애물 없을 때: 일직선 배치
+    // 장애물 없을 때: 일직선 배치 (개선됨)
     void SpawnItemsLine(GameObject platform, Vector2 platformPosition, Vector2 platformSize)
     {
         float width = platformSize.x;
         float itemY = (platformSize.y / 2f) + itemHeightOffset;
-        int itemCount = Mathf.Clamp(Mathf.FloorToInt(width / 1.5f), 3, 5);
+        int itemCount = Mathf.Clamp(Mathf.FloorToInt(width / 3f), 3, 5);  // 간격 조정 (픽셀 유닛 변경으로 두 배로 증가)
 
         // 배치할 위치들을 먼저 계산
         List<Vector2> positions = new List<Vector2>();
@@ -210,7 +209,7 @@ public class ItemSpawner : MonoBehaviour
 
     Vector2 GetLineItemPosition(float platformWidth, int count, int index, float y)
     {
-        float margin = platformWidth * 0.1f;
+        float margin = platformWidth * 0.15f;  // 여백 비율 증가
         float availableWidth = platformWidth - (2 * margin);
 
         if (count == 1) return new Vector2(0f, y);
@@ -222,34 +221,35 @@ public class ItemSpawner : MonoBehaviour
         return new Vector2(x, y);
     }
 
-    // 장애물 있을 때: 곡선 배치 (수정됨)
+    // 장애물 있을 때: 곡선 배치 (완전히 수정됨)
     void SpawnItemsCurve(GameObject platform, Transform obstacle, Vector2 platformPosition, Vector2 platformSize)
     {
         float width = platformSize.x;
         float height = platformSize.y;
         int itemCount = 8; // 곡선상의 아이템 개수
 
-        float arcStart = -70f;
-        float arcEnd = 70f;
-        float radius = width * 0.45f;
+        float arcStart = -75f;
+        float arcEnd = 75f;
+        float radius = width * 0.45f; // 반지름은 플랫폼 너비 비율로 계산하므로 그대로 유지
 
-        // 곡선상의 모든 위치 계산
+        // 곡선상의 모든 위치 계산 (장애물 더 아래로)
         List<Vector2> allPositions = new List<Vector2>();
         for (int i = 0; i < itemCount; i++)
         {
             float t = i / (float)(itemCount - 1);
             float angle = Mathf.Lerp(arcStart, arcEnd, t) * Mathf.Deg2Rad;
-            // 장애물을 더 아래로 내리기 위해 높이 조정
+            
+            // 장애물을 더 아래로 내리고 곡선을 더 넓게 조정
             Vector2 pos = new Vector2(
                 Mathf.Sin(angle) * radius, 
-                (height / 2f) + itemHeightOffset + (Mathf.Cos(angle) * radius * 0.8f) - 0.5f
+                (height / 2f) + itemHeightOffset + (Mathf.Cos(angle) * radius * 0.7f) - 1.6f  // 픽셀 유닛 변경으로 오프셋 두 배로 증가
             );
             allPositions.Add(pos);
         }
 
-        // 장애물과 겹치지 않는 위치만 필터링
+        // 장애물과 겹치지 않는 위치만 필터링 (더 엄격한 검사)
         List<Vector2> usablePositions = new List<Vector2>();
-        float checkRadius = 0.35f; // 충돌 검사 반경 증가
+        float checkRadius = 0.8f; // 픽셀 유닛 변경으로 충돌 검사 반경 두 배로 증가
         
         for (int i = 0; i < allPositions.Count; i++)
         {
@@ -283,16 +283,27 @@ public class ItemSpawner : MonoBehaviour
         {
             if (sunlightIdx != -1)
             {
-                do {
-                    pillIdx = Random.Range(0, usablePositions.Count);
-                } while (pillIdx == sunlightIdx);
+                // 햇빛과 다른 위치 선택
+                List<int> availableIndices = new List<int>();
+                for (int i = 0; i < usablePositions.Count; i++)
+                {
+                    if (i != sunlightIdx) availableIndices.Add(i);
+                }
+                
+                if (availableIndices.Count > 0)
+                {
+                    pillIdx = availableIndices[Random.Range(0, availableIndices.Count)];
+                }
             }
             else
             {
                 pillIdx = Random.Range(0, usablePositions.Count);
             }
             
-            SpawnPill(usablePositions[pillIdx], platform);
+            if (pillIdx != -1)
+            {
+                SpawnPill(usablePositions[pillIdx], platform);
+            }
         }
 
         // 물방울을 나머지 모든 위치에 배치 (햇빛, 알약 자리 제외)

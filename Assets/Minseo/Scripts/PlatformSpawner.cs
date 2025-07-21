@@ -8,19 +8,35 @@ public class PlatformSpawner : MonoBehaviour
     [Range(0f, 1f)]
     public float longPlatformChance = 0.5f; // 긴 플랫폼 선택 확률 (50%)
     
-    public int count = 2;   // 생상할 발판의 개수
+    public int count = 6;   // 생상할 발판의 개수
 
     public float timeBetSpawnMin = 1.25f;  // 발판 생성 간격 최소값
     public float timeBetSpawnMax = 2.5f;  // 발판 생성 간격 최대값
     private float timeBetSpawn;  // 다음 배치까지의 시간 간격
 
-    public float yMin = -3.5f;   // 배치할 위치의 최소 y값
-    public float yMax = 1.5f;    // 배치할 위치의 최소 y값
+    public float yMin = -5.0f;   // 배치할 위치의 최소 y값
+    public float yMax = -1.0f;   // 배치할 위치의 최대 y값 (낮춤)
     private float xPos = 20f;  // 배치할 위치의 x값
     private GameObject[] platforms;  // 생성된 발판들을 저장할 배열
     private int currentIndex = 0;  // 현재 발판의 인덱스
     private Vector2 poolPosition = new Vector2(0, 25f);  // 발판이 풀링될 위치
     private float lastSpawnTime;  // 마지막 발판 생성 시간
+    
+    // 비활성화된 플랫폼을 찾는 메서드
+    private int FindInactivePlatform()
+    {
+        // 모든 플랫폼을 순회하며 비활성화된 것을 찾음
+        for (int i = 0; i < platforms.Length; i++)
+        {
+            if (!platforms[i].activeSelf)
+            {
+                return i;
+            }
+        }
+        // 모든 플랫폼이 활성화되어 있으면 -1 반환
+        return -1;
+    }
+    
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
@@ -63,34 +79,46 @@ public class PlatformSpawner : MonoBehaviour
 
             // 배치할 위치의 높이를 yMin과 yMax 사이의 랜덤 값으로 설정
             float yPos = Random.Range(yMin, yMax);
-
-            // 사용할 현재 순번의 발판 게임 오브젝트를 비활성화하고 즉시 다시 활성화
-            // 이때 발판의 Platform 컴포넌트의 OnEnable 메서드가 실행됨
-            platforms[currentIndex].SetActive(false);
-            platforms[currentIndex].SetActive(true);
-
-            // 현재 순번의 발판을 화면 오른쪽으로 재배치
-            platforms[currentIndex].transform.position = new Vector2(xPos, yPos);
-
-            // 아이템 스폰
-            if (ItemSpawnerFixed.Instance != null)
+            
+            // 비활성화된 플랫폼 찾기
+            int platformIndex = FindInactivePlatform();
+            
+            // 비활성화된 플랫폼이 있다면 재사용
+            if (platformIndex != -1)
+            {
+                // 발판의 Platform 컴포넌트의 OnEnable 메서드가 실행됨
+                platforms[platformIndex].SetActive(true);
+                
+                // 발판을 화면 오른쪽으로 재배치
+                platforms[platformIndex].transform.position = new Vector2(xPos, yPos);
+            }
+            // 모든 플랫폼이 활성화되어 있다면 기존 방식대로 순차적으로 재사용
+            else
+            {
+                // 사용할 현재 순번의 발판 게임 오브젝트를 비활성화하고 즉시 다시 활성화
+                platforms[currentIndex].SetActive(false);
+                platforms[currentIndex].SetActive(true);
+                
+                // 현재 순번의 발판을 화면 오른쪽으로 재배치
+                platforms[currentIndex].transform.position = new Vector2(xPos, yPos);
+                
+                // 순번 넘기기
+                currentIndex = (currentIndex + 1) % count;
+            }
+            
+            // 아이템 스폰 (활성화된 플랫폼 인덱스에 따라)
+            int activeIndex = platformIndex != -1 ? platformIndex : currentIndex > 0 ? currentIndex - 1 : count - 1;
+            if (ItemSpawner.Instance != null)
             {
                 // 플랫폼 위치와 크기 정보 전달
-                Vector2 platformPos = platforms[currentIndex].transform.position;
-                Collider2D platformCol = platforms[currentIndex].GetComponent<Collider2D>();
+                Vector2 platformPos = platforms[activeIndex].transform.position;
+                Collider2D platformCol = platforms[activeIndex].GetComponent<Collider2D>();
                 Vector2 platformSize = platformCol ? platformCol.bounds.size : Vector2.one;
                 
-                ItemSpawnerFixed.Instance.SpawnItemsOnPlatform(platformPos, platformSize, platforms[currentIndex]);
+                ItemSpawner.Instance.SpawnItemsOnPlatform(platformPos, platformSize, platforms[activeIndex]);
             }
 
-            // 순번 넘기기
-            currentIndex++;
-
-            // 마지막 순번에 도달했다면 순번을 리셋
-            if (currentIndex >= count)
-            {
-                currentIndex = 0;
-            }
+            // 여기서 기존 코드 제거 (위로 이동됨)
         }
     }
 }

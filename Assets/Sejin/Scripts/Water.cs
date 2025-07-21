@@ -8,10 +8,16 @@ public class Water : MonoBehaviour
     {
         if (other.CompareTag("Player"))
         {
-            Debug.Log("💧 Player가 물과 충돌 - 점수 증가 + 오브젝트 제거");
+            Debug.Log("💧 Player가 물과 충돌 - 점수 증가 + 오브젝트 비활성화");
 
-            //GameManager.instance.AddScore(scoreValue);
-            Destroy(gameObject);
+            // UIManager를 통한 점수 추가
+            if (UIManager.Instance != null)
+            {
+                UIManager.Instance.CollectWaterDrop();
+            }
+            
+            // 게임 오브젝트 비활성화 (오브젝트 풀링 사용)
+            gameObject.SetActive(false);
         }
     }
 }
