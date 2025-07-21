@@ -67,7 +67,7 @@ public class PlayerController : MonoBehaviour
         isDead = true;
 
         // 게임 매니저의 게임 오버 처리 실행
-        //GameManager.instance.OnPlayerDead();
+        //GameManager.instance.EndGame();
     }
 
     private void TakeDamage(int damage)
