@@ -109,11 +109,9 @@ public class ItemSpawner : MonoBehaviour
                 child.CompareTag("Hit") && 
                 child.gameObject.activeInHierarchy)
             {
-                Debug.Log($"장애물 발견: {child.name} on platform {platform.name}");
                 return child;
             }
         }
-        Debug.Log($"장애물 없음: platform {platform.name}");
         return null;
     }
 
@@ -128,7 +126,6 @@ public class ItemSpawner : MonoBehaviour
             {
                 child.gameObject.SetActive(false);
                 child.SetParent(null);
-                Debug.Log($"아이템 제거: {child.name}");
             }
         }
     }
@@ -143,16 +140,23 @@ public class ItemSpawner : MonoBehaviour
 
         platformCountThisStage++;
 
+        // 스테이지 리셋 확인 (10개 플랫폼마다 스테이지 초기화)
+        if (platformCountThisStage > platformsPerStage)
+        {
+            platformCountThisStage = 1;
+            pillSpawnedThisStage = 0;
+            sunlightSpawnedThisStage = 0;
+            currentStage++;
+        }
+
         Transform activeObstacle = FindActiveObstacleOnPlatform(platform);
 
         if (activeObstacle == null)
         {
-            Debug.Log($"일직선 배치: {platform.name}");
             SpawnItemsLine(platform, platformPosition, platformSize);
         }
         else
         {
-            Debug.Log($"곡선 배치: {platform.name}");
             SpawnItemsCurve(platform, activeObstacle, platformPosition, platformSize);
         }
     }
@@ -263,7 +267,6 @@ public class ItemSpawner : MonoBehaviour
 
         if (usablePositions.Count == 0)
         {
-            Debug.LogWarning("사용 가능한 위치가 없어서 일직선 배치로 변경");
             SpawnItemsLine(platform, platformPosition, platformSize);
             return;
         }
@@ -277,11 +280,11 @@ public class ItemSpawner : MonoBehaviour
             SpawnSunlight(usablePositions[sunlightIdx], platform);
         }
 
-        // 알약 배치 (햇빛과 겹치지 않게, 최소 2개 위치 필요)
+        // 알약 배치 (조건 완화 - 더 자주 스폰)
         int pillIdx = -1;
-        if (pillSpawnedThisStage < maxPillsPerStage && pillPool != null && usablePositions.Count >= 2)
+        if (pillPool != null && usablePositions.Count >= 1)  // 조건 완화: 최소 1개 위치면 됨
         {
-            if (sunlightIdx != -1)
+            if (sunlightIdx != -1 && usablePositions.Count > 1)
             {
                 // 햇빛과 다른 위치 선택
                 List<int> availableIndices = new List<int>();
@@ -295,7 +298,7 @@ public class ItemSpawner : MonoBehaviour
                     pillIdx = availableIndices[Random.Range(0, availableIndices.Count)];
                 }
             }
-            else
+            else if (usablePositions.Count > 0)  // 햇빛 없으면 아무 위치나
             {
                 pillIdx = Random.Range(0, usablePositions.Count);
             }
@@ -303,6 +306,7 @@ public class ItemSpawner : MonoBehaviour
             if (pillIdx != -1)
             {
                 SpawnPill(usablePositions[pillIdx], platform);
+                Debug.Log($"🔴 곡선 배치 알약 스폰 성공! 위치: {pillIdx}");
             }
         }
 
@@ -331,9 +335,35 @@ public class ItemSpawner : MonoBehaviour
         if (pillPool == null || pillPool.Length == 0) return;
 
         GameObject pill = pillPool[pillIndex];
+        if (pill == null) return;
+
+        // 부모에서 분리 후 활성화
+        pill.transform.SetParent(null);
+        pill.SetActive(true);
+        
+        // 부모 설정
         pill.transform.SetParent(parentPlatform.transform, false);
         pill.transform.localPosition = localPosition;
+        
+        // 다시 한번 강제 활성화
         pill.SetActive(true);
+        pill.gameObject.SetActive(true);
+        
+        // 컴포넌트 강제 활성화
+        Collider2D pillCollider = pill.GetComponent<Collider2D>();
+        if (pillCollider != null) 
+        {
+            pillCollider.enabled = true;
+            pillCollider.isTrigger = true;
+        }
+        
+        SpriteRenderer pillRenderer = pill.GetComponent<SpriteRenderer>();
+        if (pillRenderer != null) 
+        {
+            pillRenderer.enabled = true;
+            pillRenderer.color = new Color(1, 1, 1, 1); // 불투명하게
+        }
+        
         pillSpawnedThisStage++;
         pillIndex = (pillIndex + 1) % pillPoolCount;
     }
@@ -343,9 +373,35 @@ public class ItemSpawner : MonoBehaviour
         if (sunlightPool == null || sunlightPool.Length == 0) return;
 
         GameObject sunlight = sunlightPool[sunlightIndex];
+        if (sunlight == null) return;
+
+        // 부모에서 분리 후 활성화
+        sunlight.transform.SetParent(null);
+        sunlight.SetActive(true);
+        
+        // 부모 설정
         sunlight.transform.SetParent(parentPlatform.transform, false);
         sunlight.transform.localPosition = localPosition;
+        
+        // 다시 한번 강제 활성화
         sunlight.SetActive(true);
+        sunlight.gameObject.SetActive(true);
+        
+        // 컴포넌트 강제 활성화
+        Collider2D sunlightCollider = sunlight.GetComponent<Collider2D>();
+        if (sunlightCollider != null) 
+        {
+            sunlightCollider.enabled = true;
+            sunlightCollider.isTrigger = true;
+        }
+        
+        SpriteRenderer sunlightRenderer = sunlight.GetComponent<SpriteRenderer>();
+        if (sunlightRenderer != null) 
+        {
+            sunlightRenderer.enabled = true;
+            sunlightRenderer.color = new Color(1, 1, 1, 1); // 불투명하게
+        }
+        
         sunlightSpawnedThisStage++;
         sunlightIndex = (sunlightIndex + 1) % sunlightPoolCount;
     }

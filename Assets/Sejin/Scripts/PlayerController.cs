@@ -72,17 +72,34 @@ public class PlayerController : MonoBehaviour
 
     private void TakeDamage(int damage)
     {
-        currentHealth -= damage;
-        Debug.Log("데미지! 현재 체력: " + currentHealth);
-
-        if (currentHealth <= 0)
+        Debug.Log("TakeDamage 메서드 호출됨! 데미지: " + damage);
+        
+        // 무적 상태 확인
+        InvincibilityItem invincibilityController = GetComponent<InvincibilityItem>();
+        if (invincibilityController != null && invincibilityController.IsInvincible)
         {
-            Die();
+            Debug.Log("무적 상태이므로 데미지를 받지 않습니다!");
+            return;
+        }
+        
+        Debug.Log("장애물과 충돌! UIManager로 데미지 처리");
+
+        // UIManager를 통해 하트 UI 업데이트 (UIManager에서 하트 개수와 게임오버 관리)
+        if (UIManager.Instance != null)
+        {
+            Debug.Log("UIManager.Instance 찾음. TakeDamage 호출");
+            UIManager.Instance.TakeDamage();
+        }
+        else
+        {
+            Debug.LogError("UIManager.Instance가 null입니다! UIManager가 씬에 있는지 확인하세요.");
         }
     }
 
     private void OnTriggerEnter2D(Collider2D other)
     {
+        Debug.Log("OnTriggerEnter2D 호출됨! 충돌한 오브젝트: " + other.name + ", 태그: " + other.tag);
+        
         if (other.tag == "Dead" && !isDead)
         {
             // 충돌한 상대방의 태그가 Dead이며 아직 사망하지 않았다면 Die() 실행
@@ -91,6 +108,7 @@ public class PlayerController : MonoBehaviour
         }
         else if (other.tag == "Hit" && !isDead)
         {
+            Debug.Log("Hit 태그 장애물과 충돌! TakeDamage 호출");
             TakeDamage(1); // 체력 1 깎기
         }
     }

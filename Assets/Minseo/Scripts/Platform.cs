@@ -4,7 +4,7 @@ public class Platform : MonoBehaviour
 {
     public GameObject[] obstacles; // 장애물 컴포넌트
     private bool stepped = false; // 플레이어 캐릭터가 밟았었는가
-    public float speed = 5f; // 플랫폼 이동 속도
+    public float speed = 10f; // 플랫폼 이동 속도 (빠르게 수정)
     private float leftBorder; // 화면 왼쪽 경계
 
     // 컴포넌트가 활성활될 때마다 매번 실행되는 메서드
@@ -19,14 +19,18 @@ public class Platform : MonoBehaviour
         // 장애물의 개수만큼 루프
         for (int i = 0; i < obstacles.Length; i++)
         {
-            // 현재 순번의 장애물을 1/3의 확률로 활성화
-            if (Random.Range(0, 3) == 0)
+            // null 체크 추가
+            if (obstacles[i] != null)
             {
-                obstacles[i].SetActive(true);
-            }
-            else
-            {
-                obstacles[i].SetActive(false);
+                // 현재 순번의 장애물을 1/3의 확률로 활성화
+                if (Random.Range(0, 3) == 0)
+                {
+                    obstacles[i].SetActive(true);
+                }
+                else
+                {
+                    obstacles[i].SetActive(false);
+                }
             }
         }
     }
@@ -39,14 +43,6 @@ public class Platform : MonoBehaviour
             // 플레이어가 밟았음을 기록
             stepped = true;
 
-            // GameManager의 점수 증가 메서드 호출
-            //GameManager.instance.AddScore(1);
-            
-            // UIManager를 통해 점수 추가
-            if (UIManager.Instance != null)
-            {
-                UIManager.Instance.UpdateScore(1);
-            }
         }
     }
     
