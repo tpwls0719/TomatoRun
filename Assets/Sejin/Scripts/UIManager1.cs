@@ -28,25 +28,23 @@ public class UIManager1 : MonoBehaviour
     
     public static UIManager1 Instance { get; private set; }  // 싱글톤 인스턴스
     
-    private void Awake()
+   private void Awake()
+{
+    if (Instance == null)
     {
-        // 싱글톤 패턴 구현
-        if (Instance == null)
-        {
-            Instance = this;
-            DontDestroyOnLoad(gameObject);
-        }
-        else
-        {
-            Destroy(gameObject);
-        }
-        
-        // 초기 점수 설정
-        UpdateScore(0);
-        
-        // 초기 생명 설정
-        UpdateHeartDisplay();
+        Instance = this;
+        DontDestroyOnLoad(gameObject);
     }
+    else if (Instance != this)
+    {
+        Destroy(gameObject);
+        return;
+    }
+
+    // 초기화는 중복 인스턴스가 아닐 때만
+    UpdateScore(0);
+    UpdateHeartDisplay();
+}
 
     public void Update()
     {

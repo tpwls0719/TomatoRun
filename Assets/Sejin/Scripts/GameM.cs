@@ -35,7 +35,7 @@ public class GameM : MonoBehaviour
         isGameOver = false;
 
         // UIManager 초기값 세팅
-        if (UIManager.Instance != null)
+        if (UIManager1.Instance != null)
         {
             UIManager1.Instance.currentHearts = maxHearts;
             UIManager1.Instance.maxHearts = maxHearts;
@@ -66,31 +66,31 @@ public class GameM : MonoBehaviour
     {
         if (isGameOver) return;
 
-        if (UIManager.Instance != null)
+        if (UIManager1.Instance != null)
         {
-            UIManager.Instance.CollectWaterDrop();
+            UIManager1.Instance.CollectWaterDrop();
         }
     }
 
-    // 알약(무적) 아이템 획득
+    // ✅ 알약(무적) 아이템 획득 - UI 관리 및 게임 상태 처리만 담당
     public void PlayerCollectPill()
     {
         if (isGameOver) return;
 
-        if (UIManager.Instance != null)
+        if (UIManager1.Instance != null)
         {
-            UIManager.Instance.CollectPill();
+            UIManager1.Instance.CollectPill(); // 사운드/이펙트/UI 등 처리
         }
     }
 
-    // 햇빛(생명) 아이템 획득
+    // 햇빛 아이템 획득 시 UI와 게임 상태 업데이트 처리 함수 호출
     public void PlayerCollectSunlight()
     {
         if (isGameOver) return;
 
-        if (UIManager.Instance != null)
+        if (UIManager1.Instance != null)
         {
-            UIManager.Instance.CollectSunlight();
+            UIManager1.Instance.CollectSunlight();
         }
     }
 
@@ -116,4 +116,3 @@ public class GameM : MonoBehaviour
         //SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
 }
-
