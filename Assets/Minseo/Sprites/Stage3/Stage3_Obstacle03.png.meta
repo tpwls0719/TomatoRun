@@ -1,16 +1,10 @@
 fileFormatVersion: 2
-guid: 06f7ecf017d789349b1987bfdcddfc86
+guid: 72ee3a50fabcc5148a86477850fc4d42
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 2868085863382841265
-    second: Stage4_Obstacle03_0
-  - first:
-      213: -3658304882673555884
-    second: Stage4_Obstacle03_1
-  - first:
-      213: 2867365526750503489
-    second: Stage4_Obstacle03_2
+      213: -483708174655657402
+    second: Stage3_Obstacle03_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -106,13 +100,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Stage4_Obstacle03_0
+      name: Stage3_Obstacle03_0
       rect:
         serializedVersion: 2
-        x: 199
-        y: 291
-        width: 626
-        height: 467
+        x: 11
+        y: 0
+        width: 1494
+        height: 1024
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -121,52 +115,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 1b7f040a5ec7dc720800000000000000
-      internalID: 2868085863382841265
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: Stage4_Obstacle03_1
-      rect:
-        serializedVersion: 2
-        x: 199
-        y: 88
-        width: 111
-        height: 209
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 4566a2c77171b3dc0800000000000000
-      internalID: -3658304882673555884
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: Stage4_Obstacle03_2
-      rect:
-        serializedVersion: 2
-        x: 670
-        y: 223
-        width: 51
-        height: 42
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 1422a2f21cdeac720800000000000000
-      internalID: 2867365526750503489
+      spriteID: 64a62ba5af58949f0800000000000000
+      internalID: -483708174655657402
       vertices: []
       indices: 
       edges: []
@@ -185,9 +135,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      Stage4_Obstacle03_0: 2868085863382841265
-      Stage4_Obstacle03_1: -3658304882673555884
-      Stage4_Obstacle03_2: 2867365526750503489
+      Stage3_Obstacle03_0: -483708174655657402
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

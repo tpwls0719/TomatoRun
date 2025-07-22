@@ -133,11 +133,48 @@ public class ItemSpawner : MonoBehaviour
     // 메인 스폰 메서드
     public void SpawnItemsOnPlatform(Vector2 platformPosition, Vector2 platformSize, GameObject platform)
     {
+        // 게임 오버 상태에서는 스폰 안함
+        GameManager gameManager = FindFirstObjectByType<GameManager>();
+        if (gameManager != null && gameManager.isGameOver)
+        {
+            return;
+        }
+
+        // 플랫폼 유효성 검사
+        if (platform == null) 
+        {
+            Debug.LogWarning("ItemSpawner: platform이 null입니다");
+            return;
+        }
+        
+        if (platformSize.x < minPlatformWidthForItems) 
+        {
+            Debug.Log($"ItemSpawner: 플랫폼이 너무 작습니다 ({platformSize.x} < {minPlatformWidthForItems})");
+            return;
+        }
+
+        // 이미 아이템이 있는 플랫폼인지 확인 (중복 스폰 방지)
+        if (platform.transform.childCount > 0)
+        {
+            bool hasActiveItems = false;
+            for (int i = 0; i < platform.transform.childCount; i++)
+            {
+                Transform child = platform.transform.GetChild(i);
+                if (child.gameObject.activeSelf && 
+                    (child.CompareTag("Pill") || child.CompareTag("WaterDrop") || child.CompareTag("SunLight")))
+                {
+                    hasActiveItems = true;
+                    break;
+                }
+            }
+            if (hasActiveItems)
+            {
+                Debug.Log("ItemSpawner: 플랫폼에 이미 활성화된 아이템이 있어서 스킵합니다");
+                return;
+            }
+        }
+
         ClearItemsFromPlatform(platform);
-
-        if (platform == null) return;
-        if (platformSize.x < minPlatformWidthForItems) return;
-
         platformCountThisStage++;
 
         // 스테이지 리셋 확인 (10개 플랫폼마다 스테이지 초기화)

@@ -75,6 +75,18 @@ public class SunLight : MonoBehaviour
             {
                 GameObject effectObject = effectTransform.gameObject;
                 
+                // 이미 활성화된 이펙트가 있으면 먼저 정리
+                if (effectObject.activeSelf)
+                {
+                    // 파티클 시스템 강제 정지
+                    ParticleSystem existingParticles = effectObject.GetComponent<ParticleSystem>();
+                    if (existingParticles != null)
+                    {
+                        existingParticles.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+                    }
+                    effectObject.SetActive(false);
+                }
+                
                 // 이펙트 활성화
                 effectObject.SetActive(true);
                 
@@ -82,13 +94,33 @@ public class SunLight : MonoBehaviour
                 ParticleSystem particles = effectObject.GetComponent<ParticleSystem>();
                 if (particles != null)
                 {
-                    particles.Play();
+                    particles.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear); // 완전 초기화
+                    particles.Play(); // 새로 시작
                 }
                 
-                // 3초 후 이펙트 비활성화
-                StartCoroutine(DeactivateEffectAfterDelay(effectObject, effectDuration));
-                
-                Debug.Log("햇빛 힐링 이펙트 재생 시작 - " + effectDuration + "초간");
+                // 플레이어의 PlayerController에서 코루틴 실행 (더 안전함)
+                PlayerController playerController = player.GetComponent<PlayerController>();
+                if (playerController != null)
+                {
+                    playerController.StartCoroutine(DeactivateEffectAfterDelay(effectObject, effectDuration));
+                    Debug.Log("PlayerController에서 햇빛 힐링 이펙트 코루틴 시작 - " + effectDuration + "초간");
+                }
+                else
+                {
+                    // 플레이어의 MonoBehaviour에서 코루틴 실행 (fallback)
+                    MonoBehaviour playerMono = player.GetComponent<MonoBehaviour>();
+                    if (playerMono != null)
+                    {
+                        playerMono.StartCoroutine(DeactivateEffectAfterDelay(effectObject, effectDuration));
+                        Debug.Log("플레이어 MonoBehaviour에서 햇빛 힐링 이펙트 코루틴 시작 - " + effectDuration + "초간");
+                    }
+                    else
+                    {
+                        Debug.LogWarning("플레이어에 적절한 컴포넌트가 없어 이펙트 타이머를 설정할 수 없습니다.");
+                        // 최후의 수단: 즉시 비활성화
+                        effectObject.SetActive(false);
+                    }
+                }
             }
             else
             {
@@ -101,22 +133,33 @@ public class SunLight : MonoBehaviour
         }
     }
     
-    // 일정 시간 후 이펙트 비활성화
-    private IEnumerator DeactivateEffectAfterDelay(GameObject effectObject, float delay)
+    // 일정 시간 후 이펙트 비활성화 (정적 메서드로 변경)
+    private static IEnumerator DeactivateEffectAfterDelay(GameObject effectObject, float delay)
     {
+        Debug.Log($"이펙트 타이머 시작: {delay}초 후 종료 예정");
+        
         yield return new WaitForSeconds(delay);
         
         if (effectObject != null)
         {
-            // 파티클 시스템이 있다면 정지
+            // 파티클 시스템이 있다면 완전히 정지
             ParticleSystem particles = effectObject.GetComponent<ParticleSystem>();
             if (particles != null)
             {
-                particles.Stop();
+                particles.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear); // 방출 정지 + 기존 파티클 제거
+                Debug.Log("파티클 시스템 정지 완료");
+                
+                // 파티클이 완전히 사라질 때까지 대기
+                yield return new WaitForSeconds(0.5f);
             }
             
+            // 이펙트 오브젝트 비활성화
             effectObject.SetActive(false);
-            Debug.Log("햇빛 힐링 이펙트 종료");
+            Debug.Log("햇빛 힐링 이펙트 종료 - " + effectObject.name + " 비활성화됨");
+        }
+        else
+        {
+            Debug.LogWarning("이펙트 오브젝트가 null입니다. 이미 파괴되었을 수 있습니다.");
         }
     }
 }

@@ -24,7 +24,7 @@ public class UIManager : MonoBehaviour
     public InvincibilityItem invincibilityController;  // 무적 모드 컨트롤러
     
     [Header("게임 오버 UI")]
-    public GameObject gameOverUI;        // 게임 오버 UI 패널
+    public GameObject gameOverUI;        // 게임 오버 UI 패널 (GameManager에서도 접근 가능)
     public TextMeshProUGUI gameOverScoreText;  // 게임 오버 시 현재 점수 표시
     
     [Header("설정")]
@@ -37,11 +37,12 @@ public class UIManager : MonoBehaviour
     
     private void Awake()
     {
-        // 싱글톤 패턴 구현
+        // 싱글톤 패턴 구현 (DontDestroyOnLoad 제거)
         if (Instance == null)
         {
             Instance = this;
-            DontDestroyOnLoad(gameObject);
+            // DontDestroyOnLoad 제거 - UI는 씬에 종속되어야 함
+            // DontDestroyOnLoad(gameObject);
         }
         else
         {
@@ -206,7 +207,7 @@ public class UIManager : MonoBehaviour
     }
     
     // 게임 오버 처리
-    void GameOver()
+    public void GameOver()
     {
         // 최고 점수 최종 저장
         if (currentScore > bestScore)
@@ -253,6 +254,54 @@ public class UIManager : MonoBehaviour
         Debug.Log("게임 재시작!");
     }
     
+    // 버튼용 재시작 메서드 (GameManager의 씬 재로드 방식)
+    public void RestartGameButton()
+    {
+        Debug.Log("재시작 버튼 클릭됨!");
+        
+        // 게임 오버 UI 먼저 끄기
+        if (gameOverUI != null)
+        {
+            gameOverUI.SetActive(false);
+        }
+        
+        // GameManager를 안전하게 찾아서 재시작
+        GameManager gameManager = FindFirstObjectByType<GameManager>();
+        if (gameManager != null)
+        {
+            gameManager.RestartGame();
+        }
+        else
+        {
+            // GameManager가 없으면 기존 방식으로 재시작
+            RestartGame();
+        }
+    }
+    
+    // 버튼용 빠른 재시작 메서드 (씬 재로드 없이)
+    public void RestartGameQuickButton()
+    {
+        Debug.Log("빠른 재시작 버튼 클릭됨!");
+        
+        // 게임 오버 UI 먼저 끄기
+        if (gameOverUI != null)
+        {
+            gameOverUI.SetActive(false);
+        }
+        
+        // GameManager를 안전하게 찾아서 빠른 재시작
+        GameManager gameManager = FindFirstObjectByType<GameManager>();
+        if (gameManager != null)
+        {
+            gameManager.RestartGameWithoutReload();
+        }
+        else
+        {
+            // GameManager가 없으면 기존 방식으로 재시작
+            RestartGame();
+        }
+    }
+    
     // 게임 오버 UI에 현재 점수 업데이트
     void UpdateGameOverScore()
     {
@@ -265,5 +314,12 @@ public class UIManager : MonoBehaviour
         {
             Debug.LogWarning("게임 오버 점수 텍스트가 설정되지 않았습니다!");
         }
+    }
+    
+    // 게임 시간 리셋 메서드
+    public void ResetGameTime()
+    {
+        gameTime = 0f;
+        Debug.Log("게임 시간이 0으로 리셋되었습니다");
     }
 }

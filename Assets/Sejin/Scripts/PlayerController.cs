@@ -25,6 +25,35 @@ public class PlayerController : MonoBehaviour
 
         currentHealth = maxHealth;
     }
+    
+    // 플레이어 상태를 초기화하는 메서드 (GameManager에서 호출)
+    public void ResetPlayerState()
+    {
+        Debug.Log("플레이어 상태 초기화 시작");
+        
+        // 기본 상태 초기화
+        jumpCount = 0;
+        isGrounded = false;
+        isDead = false;
+        currentHealth = maxHealth;
+        
+        // 물리 상태 초기화
+        if (playerRigidbody != null)
+        {
+            playerRigidbody.linearVelocity = Vector2.zero;
+            playerRigidbody.angularVelocity = 0f;
+        }
+        
+        // 애니메이터 상태 초기화
+        if (animator != null)
+        {
+            animator.SetBool("Grounded", isGrounded);
+            // 사망 상태에서 일반 상태로 복귀 (필요한 경우)
+            animator.ResetTrigger("Die");
+        }
+        
+        Debug.Log("플레이어 상태 초기화 완료 - 체력: " + currentHealth + "/" + maxHealth);
+    }
 
     // Update is called once per frame
     void Update()
@@ -67,7 +96,7 @@ public class PlayerController : MonoBehaviour
         isDead = true;
 
         // 게임 매니저의 게임 오버 처리 실행
-        //GameManager.instance.EndGame();
+        GameManager.Instance.GameOver();
     }
 
     private void TakeDamage(int damage)

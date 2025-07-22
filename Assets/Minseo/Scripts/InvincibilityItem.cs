@@ -359,4 +359,31 @@ public class InvincibilityItem : MonoBehaviour
             Debug.Log("무적 텍스트 비활성화");
         }
     }
+    
+    // 무적 상태 초기화 메서드 (GameManager에서 호출)
+    public void ResetInvincibilityState()
+    {
+        Debug.Log("무적 상태 초기화 시작");
+        
+        // 현재 실행 중인 무적 코루틴 정지
+        if (currentInvincibilityRoutine != null)
+        {
+            StopCoroutine(currentInvincibilityRoutine);
+            currentInvincibilityRoutine = null;
+        }
+        
+        // 모든 코루틴 정지 (안전장치)
+        StopAllCoroutines();
+        
+        // 무적 상태 해제
+        isInvincible = false;
+        
+        // 무적 텍스트 비활성화
+        DeactivateInvincibilityText();
+        
+        // 알약 이펙트 비활성화
+        DeactivatePillEffect();
+        
+        Debug.Log("무적 상태 초기화 완료");
+    }
 }
