@@ -34,7 +34,7 @@ public class PlayerController : MonoBehaviour
         playerRigidbody = GetComponent<Rigidbody2D>();
         animator = GetComponent<Animator>();
         spriteRenderer = GetComponent<SpriteRenderer>();
-        // playerAudio = GetComponent<AudioSource>();
+        //playerAudio = GetComponent<AudioSource>();
 
         currentHealth = maxHealth;
         boostedSpeed = originalSpeed;
@@ -133,7 +133,8 @@ public class PlayerController : MonoBehaviour
         isDead = true;
 
 
-        GameManager.Instance.GameOver();
+        GameManager.Instance.SetGameOver();
+
     }
 
     private void TakeDamage(int damage)
@@ -152,7 +153,7 @@ public class PlayerController : MonoBehaviour
     // UIManager에 현재 체력 상태를 전달
     if (UIManager.Instance != null)
     {
-        //UIManager.Instance.UpdateHeartDisplay(currentHealth);
+        UIManager.Instance.UpdateHeartDisplay(currentHealth);
     }
 
     if (currentHealth <= 0 && !isDead)

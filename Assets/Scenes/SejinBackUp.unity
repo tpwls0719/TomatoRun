@@ -429,7 +429,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &103233718
 RectTransform:
   m_ObjectHideFlags: 0
@@ -2641,7 +2641,6 @@ MonoBehaviour:
   waterDropPrefab: {fileID: 1797606070165632828, guid: f3155a3eff83c374caddaeebb8882e85, type: 3}
   pillPrefab: {fileID: 4461089370840121222, guid: 754ea628ecd1f9440bfd19d907815f67, type: 3}
   sunlightPrefab: {fileID: 6664532741775115601, guid: 7d82fbf5f21194a4f943fa1bb8529228, type: 3}
-  waterDropSpawnChance: 0.7
   pillSpawnChance: 0.74
   sunlightSpawnChance: 0.2
   itemHeightOffset: 2
@@ -2649,8 +2648,10 @@ MonoBehaviour:
   waterDropPoolCount: 30
   pillPoolCount: 5
   sunlightPoolCount: 3
-  currentStage: 1
+  maxPillsPerStage: 3
+  maxSunlightPerStage: 1
   platformsPerStage: 10
+  totalGameStages: 4
   obstacleLayerMask:
     serializedVersion: 2
     m_Bits: 0
@@ -2929,7 +2930,6 @@ MonoBehaviour:
   waterDropPrefab: {fileID: 1797606070165632828, guid: f3155a3eff83c374caddaeebb8882e85, type: 3}
   pillPrefab: {fileID: 4461089370840121222, guid: 754ea628ecd1f9440bfd19d907815f67, type: 3}
   sunlightPrefab: {fileID: 6664532741775115601, guid: 7d82fbf5f21194a4f943fa1bb8529228, type: 3}
-  waterDropSpawnChance: 0.7
   pillSpawnChance: 0.74
   sunlightSpawnChance: 0.2
   itemHeightOffset: 2
@@ -2937,8 +2937,10 @@ MonoBehaviour:
   waterDropPoolCount: 30
   pillPoolCount: 5
   sunlightPoolCount: 3
-  currentStage: 1
+  maxPillsPerStage: 3
+  maxSunlightPerStage: 1
   platformsPerStage: 10
+  totalGameStages: 4
   obstacleLayerMask:
     serializedVersion: 2
     m_Bits: 0
@@ -3621,7 +3623,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   isGameOver: 0
-  isGamePaused: 0
+  isGameCleared: 0
 --- !u!4 &1475104685
 Transform:
   m_ObjectHideFlags: 0
@@ -3786,7 +3788,6 @@ MonoBehaviour:
   waterDropPrefab: {fileID: 1797606070165632828, guid: f3155a3eff83c374caddaeebb8882e85, type: 3}
   pillPrefab: {fileID: 4461089370840121222, guid: 754ea628ecd1f9440bfd19d907815f67, type: 3}
   sunlightPrefab: {fileID: 6664532741775115601, guid: 7d82fbf5f21194a4f943fa1bb8529228, type: 3}
-  waterDropSpawnChance: 0.7
   pillSpawnChance: 0.74
   sunlightSpawnChance: 0.2
   itemHeightOffset: 2
@@ -3794,8 +3795,10 @@ MonoBehaviour:
   waterDropPoolCount: 30
   pillPoolCount: 5
   sunlightPoolCount: 3
-  currentStage: 1
+  maxPillsPerStage: 3
+  maxSunlightPerStage: 1
   platformsPerStage: 10
+  totalGameStages: 4
   obstacleLayerMask:
     serializedVersion: 2
     m_Bits: 0
@@ -3923,7 +3926,6 @@ MonoBehaviour:
   waterDropPrefab: {fileID: 1797606070165632828, guid: f3155a3eff83c374caddaeebb8882e85, type: 3}
   pillPrefab: {fileID: 4461089370840121222, guid: 754ea628ecd1f9440bfd19d907815f67, type: 3}
   sunlightPrefab: {fileID: 6664532741775115601, guid: 7d82fbf5f21194a4f943fa1bb8529228, type: 3}
-  waterDropSpawnChance: 0.7
   pillSpawnChance: 0.74
   sunlightSpawnChance: 0.2
   itemHeightOffset: 2
@@ -3931,8 +3933,10 @@ MonoBehaviour:
   waterDropPoolCount: 30
   pillPoolCount: 5
   sunlightPoolCount: 3
-  currentStage: 1
+  maxPillsPerStage: 3
+  maxSunlightPerStage: 1
   platformsPerStage: 10
+  totalGameStages: 4
   obstacleLayerMask:
     serializedVersion: 2
     m_Bits: 0
