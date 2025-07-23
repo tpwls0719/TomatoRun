@@ -209,13 +209,12 @@ public class GameManager : MonoBehaviour
     // 게임 오버 상태 설정
     public void EndGame()
     {
+        // 이미 게임 오버 상태면 중복 처리 방지
+        if (isGameOver) return;
+        
         isGameOver = true;
         isGameCleared = false;
         Debug.Log("GameManager: 게임 오버 상태로 설정됨");
-   if (UIManager.Instance != null)
-       {
-              UIManager.Instance.GameOver(); // 이게 꼭 있어야 함!
-      }
     }
     
     // 게임 클리어 상태 설정
