@@ -270,7 +270,7 @@ public class UIManager : MonoBehaviour
         GameManager gameManager = FindFirstObjectByType<GameManager>();
         if (gameManager != null)
         {
-            gameManager.SetGameOver();
+            gameManager.EndGame();
         }
         
         // 최고 점수 최종 저장

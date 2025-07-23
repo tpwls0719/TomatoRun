@@ -207,7 +207,7 @@ public class GameManager : MonoBehaviour
     }
     
     // 게임 오버 상태 설정
-    public void SetGameOver()
+    public void EndGame()
     {
         isGameOver = true;
         isGameCleared = false;
@@ -223,7 +223,7 @@ public class GameManager : MonoBehaviour
     }
     
     // 게임 상태 확인 메서드들
-    public bool IsGameOver()
+    public bool GameOver()
     {
         return isGameOver;
     }
