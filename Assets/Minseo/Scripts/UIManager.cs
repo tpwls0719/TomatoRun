@@ -265,14 +265,7 @@ public class UIManager : MonoBehaviour
     {
         // 게임이 이미 클리어된 상태면 게임 오버 처리 안함
         if (gameCleared) return;
-        
-        // GameManager에 게임 오버 상태 알림
-        GameManager gameManager = FindFirstObjectByType<GameManager>();
-        if (gameManager != null)
-        {
-            gameManager.EndGame();
-        }
-        
+                
         // 최고 점수 최종 저장
         if (currentScore > bestScore)
         {
