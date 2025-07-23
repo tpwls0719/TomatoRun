@@ -17,12 +17,14 @@ public class PlayerController : MonoBehaviour
     public int maxHealth = 3;
     private int currentHealth;
 
-    //  [추�] �도 관변    private float originalSpeed = 5f;
+    // [추가] 속도 관련 변수
+    private float originalSpeed = 5f;
     private float boostedSpeed;
     private bool isSpeedBoosted = false;
     private float speedBoostEndTime = 0f;
 
-    //  [추�] 무적 관변    private bool isInvincible = false;
+    // [추가] 무적 관련 변수
+    private bool isInvincible = false;
     private float invincibleEndTime = 0f;
     public float invincibleDuration = 3f;
 
@@ -37,37 +39,40 @@ public class PlayerController : MonoBehaviour
         boostedSpeed = originalSpeed;
     }
     
-    // �레�어 �태�초기�하메서(GameManager�서 �출)
+    // 플레이어 상태를 초기화하는 메서드 (GameManager에서 호출)
     public void ResetPlayerState()
     {
-        Debug.Log("�레�어 �태 초기�작");
+        Debug.Log("플레이어 상태 초기화 작업 시작");
         
-        // 기본 �태 초기        jumpCount = 0;
+        // 기본 상태 초기화
+        jumpCount = 0;
         isGrounded = false;
         isDead = false;
         currentHealth = maxHealth;
         
-        // 물리 �태 초기        if (playerRigidbody != null)
+        // 물리 상태 초기화
+        if (playerRigidbody != null)
         {
             playerRigidbody.linearVelocity = Vector2.zero;
             playerRigidbody.angularVelocity = 0f;
         }
         
-        // �니메이�태 초기        if (animator != null)
+        // 애니메이션 상태 초기화
+        if (animator != null)
         {
             animator.SetBool("Grounded", isGrounded);
-            // �망 �태�서 �반 �태�복� (�요경우)
+            // 사망 상태에서 일반 상태로 복귀 (필요한 경우)
             animator.ResetTrigger("Die");
         }
         
-        Debug.Log("�레�어 �태 초기�료 - 체력: " + currentHealth + "/" + maxHealth);
+        Debug.Log("플레이어 상태 초기화 완료 - 체력: " + currentHealth + "/" + maxHealth);
     }
 
     void Update()
     {
         if (isDead) return;
 
-        // �프
+        // 점프
         if (Input.GetMouseButtonDown(0) && jumpCount < 2)
         {
             jumpCount++;
@@ -76,21 +81,21 @@ public class PlayerController : MonoBehaviour
             // playerAudio.Play();
         }
 
-        //  부�트 �간 종료 체크
+        // 속도 부스트 시간 종료 체크
         if (isSpeedBoosted && Time.time >= speedBoostEndTime)
         {
             isSpeedBoosted = false;
             boostedSpeed = originalSpeed;
-            Debug.Log("�️ 부�트 종료");
+            Debug.Log("속도 부스트 종료");
         }
 
-        //  무적 �간 종료 체크
+        // 무적 시간 종료 체크
         if (isInvincible && Time.time >= invincibleEndTime)
         {
             isInvincible = false;
             StopCoroutine("BlinkEffect");
             spriteRenderer.enabled = true;
-            Debug.Log("���무적 �제");
+            Debug.Log("무적 상태 해제");
         }
 
         Move();
@@ -98,7 +103,7 @@ public class PlayerController : MonoBehaviour
         animator.SetBool("Grounded", isGrounded);
     }
 
-    //  좌우 �동
+    // 좌우 이동
     void Move()
     {
         float moveInput = Input.GetAxis("Horizontal");
@@ -117,34 +122,33 @@ public class PlayerController : MonoBehaviour
 
     private void TakeDamage(int damage)
     {
-        Debug.Log("TakeDamage 메서�출 ��지: " + damage);
+        Debug.Log("TakeDamage 메서드 호출 - 데미지: " + damage);
         
-        // 무적 �태 �인
+        // 무적 상태 확인
         InvincibilityItem invincibilityController = GetComponent<InvincibilityItem>();
         if (invincibilityController != null && invincibilityController.IsInvincible)
         {
-            Debug.Log("무적 �태��롰�지�받� �습�다!");
+            Debug.Log("무적 상태로 인해 데미지를 받지 않습니다!");
             return;
         }
         
-        Debug.Log("�애물과 충돌! UIManager롰�지 처리");
+        Debug.Log("장애물과 충돌! UIManager로 데미지 처리");
 
-
-        // UIManager륵해 �트 UI �데�트 (UIManager�서 �트 개수� 게임�버 관�
+        // UIManager를 통해 하트 UI 업데이트 (UIManager에서 하트 개수와 게임오버 관리)
         if (UIManager.Instance != null)
         {
-            Debug.Log("UIManager.Instance 찾음. TakeDamage �출");
+            Debug.Log("UIManager.Instance 찾음. TakeDamage 호출");
             UIManager.Instance.TakeDamage();
         }
         else
         {
-            Debug.LogError("UIManager.Instance가 null�니 UIManager가 �에 �는지 �인�세");
+            Debug.LogError("UIManager.Instance가 null입니다. UIManager가 씬에 있는지 확인하세요");
         }
     }
 
     private void OnTriggerEnter2D(Collider2D other)
     {
-        Debug.Log("OnTriggerEnter2D �출 충돌�브�트: " + other.name + ", �그: " + other.tag);
+        Debug.Log("OnTriggerEnter2D 호출 - 충돌 오브젝트: " + other.name + ", 태그: " + other.tag);
         
         if (other.tag == "Dead" && !isDead)
         {
@@ -153,7 +157,7 @@ public class PlayerController : MonoBehaviour
         }
         else if (other.tag == "Hit" && !isDead)
         {
-            Debug.Log("Hit �그 �애물과 충돌! TakeDamage �출");
+            Debug.Log("Hit 태그 장애물과 충돌! TakeDamage 호출");
             TakeDamage(1); // 체력 1 깎기
         }
     }
@@ -172,38 +176,39 @@ public class PlayerController : MonoBehaviour
         isGrounded = false;
     }
 
-    // �︇빛 �이�과
+    // 햇빛 아이템 효과
     public void ExtendMaxHealth(int amount)
     {
         maxHealth += amount;
         currentHealth += amount;
-        Debug.Log("�︇빛�로 체력 �장! �재 최� 체력: " + maxHealth);
+        Debug.Log("햇빛으로 체력 확장! 현재 최대 체력: " + maxHealth);
     }
 
-    // �도 부�트
+    // 속도 부스트
     public void ActivateSpeedBoost(float multiplier, float duration)
     {
         boostedSpeed = originalSpeed * multiplier;
         isSpeedBoosted = true;
         speedBoostEndTime = Time.time + duration;
-        Debug.Log(" �도 증�! 지�간: " + duration + "�);
+        Debug.Log("속도 증가! 지속시간: " + duration + "초");
     }
 
-    //  무적 모드 �성�수
+    // 무적 모드 활성화 메서드
     public void SetInvincible(float duration)
     {
         isInvincible = true;
         invincibleEndTime = Time.time + duration;
         StartCoroutine(BlinkEffect());
-        Debug.Log("���무적 �작! " + duration + "촙안");
+        Debug.Log("무적 상태 시작! " + duration + "초간");
     }
 
-    // 반짝�과 코루    IEnumerator BlinkEffect()
+    // 반짝임 효과 코루틴
+    IEnumerator BlinkEffect()
     {
         while (isInvincible)
         {
             spriteRenderer.enabled = !spriteRenderer.enabled;
-            yield return new WaitForSeconds(1f);
+            yield return new WaitForSeconds(0.1f);
         }
 
         spriteRenderer.enabled = true;
