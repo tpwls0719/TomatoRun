@@ -3,15 +3,18 @@ using System.Collections.Generic;
 
 public class ItemSpawner : MonoBehaviour
 {
+    /* ───── 아이템 프리팹 ───── */
     [Header("아이템 프리팹")]
     public GameObject waterDropPrefab;
     public GameObject pillPrefab;
     public GameObject sunlightPrefab;
 
+    /* ───── 스폰 확률 (물방울·알약만) ───── */
     [Header("스폰 확률 (0~1)")]
-    [Range(0f,1f)] public float pillSpawnChance     = 0.3f;
-    [Range(0f,1f)] public float sunlightSpawnChance = 0.2f;
+    [Range(0f, 1f)] public float pillSpawnChance     = 0.3f;
+    [Range(0f, 1f)] public float sunlightSpawnChance = 0.2f; // ‼ 햇빛은 고정 타이밍으로만 나오므로 사실상 미사용
 
+    /* ───── 위치·풀·카운트 설정 ───── */
     [Header("스폰 높이 오프셋")]
     public float itemHeightOffset         = 0.4f;
     public float minPlatformWidthForItems = 4.0f;
@@ -21,18 +24,19 @@ public class ItemSpawner : MonoBehaviour
     public int pillPoolCount      = 10;
     public int sunlightPoolCount  = 4;
 
-    [Header("스테이지당 최대 알약 개수")]
+    [Header("스테이지당 최대 알약/햇빛")]
     public int maxPillsPerStage    = 5;
-    [Header("스테이지당 최대 햇빛 개수")]
-    public int maxSunlightPerStage = 1;
 
     [Header("플랫폼 카운트")]
     public int platformsPerStage = 10;
 
-    [Header("시간 기반 스테이지")]
-    public int totalGameStages   = 4;
-    private float stageTimeInterval = 37.5f; // 150초 / 4
+    /* ───── 시간 기반 햇빛 타이밍 ───── */
+    [Header("고정 햇빛 타이밍(초)")]
+    // 35, 35+37.5, … — Start()에서 계산
+    readonly List<float> sunlightTimes = new();
+    int nextSunIdx = 0; // 다음 햇빛 타이밍 인덱스
 
+    /* ───── 기타 ───── */
     [Header("레이어 마스크")]
     public LayerMask obstacleLayerMask;
 
@@ -41,7 +45,6 @@ public class ItemSpawner : MonoBehaviour
     int currentStage = 1;
     int platformCountThisStage;
     int pillSpawnedThisStage;
-    int sunlightSpawnedThisStage;
 
     GameObject[] waterDropPool;
     GameObject[] pillPool;
@@ -49,11 +52,14 @@ public class ItemSpawner : MonoBehaviour
 
     int waterCursor, pillCursor, sunCursor;
 
+    /* ───────────────────────────────────────────────────────────── */
+
     void Awake()
     {
-        if (Instance == null) { 
-            Instance = this; 
-            DontDestroyOnLoad(gameObject); 
+        if (Instance == null)
+        {
+            Instance = this;
+            DontDestroyOnLoad(gameObject);
         }
         else Destroy(gameObject);
     }
@@ -61,13 +67,18 @@ public class ItemSpawner : MonoBehaviour
     void Start()
     {
         InitPools();
+
+        // 햇빛 스폰 시각 계산: 35, 72.5, 110, 147.5
+        for (int i = 0; i < 4; i++)
+            sunlightTimes.Add(30f + 37.5f * i);
     }
 
+    /* ─── 풀 초기화 ─── */
     void InitPools()
     {
-        waterDropPool  = CreatePool(waterDropPrefab, waterDropPoolCount);
-        pillPool       = CreatePool(pillPrefab,      pillPoolCount);
-        sunlightPool   = CreatePool(sunlightPrefab,  sunlightPoolCount);
+        waterDropPool = CreatePool(waterDropPrefab, waterDropPoolCount);
+        pillPool      = CreatePool(pillPrefab,      pillPoolCount);
+        sunlightPool  = CreatePool(sunlightPrefab,  sunlightPoolCount);
     }
 
     GameObject[] CreatePool(GameObject prefab, int count)
@@ -82,6 +93,7 @@ public class ItemSpawner : MonoBehaviour
         return arr;
     }
 
+    /* ─── 풀에서 비활성 오브젝트 꺼내오기 ─── */
     GameObject GetInactiveWaterDrop()
     {
         if (waterDropPool == null) return null;
@@ -108,57 +120,49 @@ public class ItemSpawner : MonoBehaviour
             if (pool[idx] != null && !pool[idx].activeSelf)
             {
                 cursor = (idx + 1) % len;
-                Debug.Log($"풀에서 오브젝트 재사용: {prefab.name}, 인덱스: {idx}");
                 return pool[idx];
             }
         }
-        
-        // 모두 사용 중이면 풀 확장
-        Debug.Log($"풀 확장 중: {prefab.name}, 기존 크기: {len}, 확장: {growBy}");
-        int old = len;
+
+        // 꽉 찼다면 풀 확장
         System.Array.Resize(ref pool, len + growBy);
         for (int i = 0; i < growBy; i++)
         {
-            pool[old + i] = Instantiate(prefab, Vector3.one * 9999, Quaternion.identity);
-            pool[old + i].SetActive(false);
-            Debug.Log($"새 오브젝트 생성: {prefab.name}_{old + i}");
+            pool[len + i] = Instantiate(prefab, Vector3.one * 9999, Quaternion.identity);
+            pool[len + i].SetActive(false);
         }
-        cursor = (old + 1) % pool.Length;
-        return pool[old];
+        cursor = (len + 1) % pool.Length;
+        return pool[len];
     }
 
-    /// <summary>
-    /// 플레이어가 알약을 먹을 때 UIManager.CollectPill()에서 호출.
-    /// 스폰 제한 카운터를 하나 줄여 줘서
-    /// "먹은 만큼 다시 스폰할 수 있도록" 만든 메서드.
-    /// </summary>
+    /* ─── 알약 먹었을 때 호출 → 스폰 제한 해제 ─── */
     public void OnPillCollected()
     {
         if (pillSpawnedThisStage > 0)
             pillSpawnedThisStage--;
     }
 
+    /* ─── 발판마다 아이템 스폰 ─── */
     public void SpawnItemsOnPlatform(Vector2 pos, Vector2 size, GameObject platform)
     {
         var gm = FindFirstObjectByType<GameManager>();
         if (gm != null && !gm.IsGameActive()) return;
         if (platform == null || size.x < minPlatformWidthForItems) return;
 
-        // 이전 아이템 전부 비활성화
+        // 이전 아이템 비활성화
         ClearItems(platform);
 
-        // 스테이지 카운트
+        // 스테이지 플랫폼 카운트
         if (++platformCountThisStage > platformsPerStage)
         {
-            platformCountThisStage      = 1;
-            pillSpawnedThisStage        = 0;
-            sunlightSpawnedThisStage    = 0;
+            platformCountThisStage = 1;
+            pillSpawnedThisStage   = 0;
             currentStage++;
         }
 
         var obs = FindActiveObstacle(platform);
         if (obs == null) SpawnLine(platform, size);
-        else            SpawnCurve(platform, obs, size);
+        else             SpawnCurve(platform, obs, size);
     }
 
     Transform FindActiveObstacle(GameObject plat)
@@ -181,6 +185,7 @@ public class ItemSpawner : MonoBehaviour
         }
     }
 
+    /* ─── 직선 패턴 ─── */
     void SpawnLine(GameObject plat, Vector2 size)
     {
         float w = size.x, y = size.y / 2 + itemHeightOffset;
@@ -192,7 +197,7 @@ public class ItemSpawner : MonoBehaviour
 
         // 햇빛
         int sunIdx = -1;
-        if (CanSpawnSunlight() && Random.value < sunlightSpawnChance)
+        if (CanSpawnSunlight())
         {
             sunIdx = Random.Range(0, posList.Count);
             SpawnSun(posList[sunIdx], plat);
@@ -225,6 +230,7 @@ public class ItemSpawner : MonoBehaviour
         return new Vector2(-avail / 2 + step * idx, y);
     }
 
+    /* ─── 곡선 패턴 ─── */
     void SpawnCurve(GameObject plat, Transform obs, Vector2 size)
     {
         float w = size.x, h = size.y, r = w * 0.45f;
@@ -253,7 +259,7 @@ public class ItemSpawner : MonoBehaviour
         }
 
         int sunIdx = -1;
-        if (CanSpawnSunlight() && Random.value < sunlightSpawnChance)
+        if (CanSpawnSunlight())
         {
             sunIdx = Random.Range(0, use.Count);
             SpawnSun(use[sunIdx], plat);
@@ -277,56 +283,41 @@ public class ItemSpawner : MonoBehaviour
         }
     }
 
+    /* ─── 알약/햇빛 스폰 ─── */
     void SpawnPill(Vector2 loc, GameObject plat)
     {
-        Debug.Log($"알약 스폰 시도: 현재 스테이지 {currentStage}, 이미 스폰된 알약: {pillSpawnedThisStage}/{maxPillsPerStage}");
-        
         var o = Pull(ref pillPool, ref pillCursor, pillPrefab, 3);
-        if (!o) 
-        {
-            Debug.LogError("알약 스폰 실패: 풀에서 오브젝트를 가져올 수 없음");
-            return;
-        }
-        
+        if (!o) return;
+
         o.transform.SetParent(plat.transform, false);
         o.transform.localPosition = loc;
         o.SetActive(true);
         pillSpawnedThisStage++;
-        
-        Debug.Log($"알약 스폰 성공: {o.name}, 위치: {loc}, 현재 스폰 수: {pillSpawnedThisStage}");
     }
 
     void SpawnSun(Vector2 loc, GameObject plat)
     {
         var o = Pull(ref sunlightPool, ref sunCursor, sunlightPrefab, 2);
         if (!o) return;
+
         o.transform.SetParent(plat.transform, false);
         o.transform.localPosition = loc;
         o.SetActive(true);
-        sunlightSpawnedThisStage++;
+
+        nextSunIdx++; // 다음 예약 타이밍으로
     }
 
+    /* ─── 햇빛 스폰 가능? ─── */
     bool CanSpawnSunlight()
     {
+        if (nextSunIdx >= sunlightTimes.Count) return false; // 예약 끝
         var ui = FindFirstObjectByType<UIManager>();
         if (ui == null) return false;
-        float t = ui.GameTime;
-        for (int st = 1; st <= totalGameStages; st++)
-        {
-            float end = st * stageTimeInterval;
-            if (t >= end - 10f && t <= end)
-            {
-                if (currentStage != st)
-                {
-                    currentStage = st;
-                    sunlightSpawnedThisStage = 0;
-                }
-                return sunlightSpawnedThisStage < maxSunlightPerStage;
-            }
-        }
-        return false;
+
+        return ui.GameTime >= sunlightTimes[nextSunIdx];
     }
 
+    /* ─── 유틸 ─── */
     int RandExcept(int size, int ex)
     {
         if (size <= 1) return 0;
@@ -335,13 +326,16 @@ public class ItemSpawner : MonoBehaviour
         return i;
     }
 
+    /* ─── 재시작 ─── */
     public void RestartGame()
     {
         currentStage = 1;
         platformCountThisStage = 0;
-        pillSpawnedThisStage = 0;
-        sunlightSpawnedThisStage = 0;
+        pillSpawnedThisStage   = 0;
+
         waterCursor = pillCursor = sunCursor = 0;
+        nextSunIdx  = 0;
+
         ResetPool(waterDropPool);
         ResetPool(pillPool);
         ResetPool(sunlightPool);
@@ -350,21 +344,14 @@ public class ItemSpawner : MonoBehaviour
     void ResetPool(GameObject[] pool)
     {
         if (pool == null) return;
-        
-        int resetCount = 0;
         foreach (var o in pool)
         {
             if (o != null)
             {
-                // 부모 관계 해제
                 o.transform.SetParent(null);
-                // 위치 초기화
                 o.transform.position = Vector3.one * 9999;
-                // 비활성화
                 o.SetActive(false);
-                resetCount++;
             }
         }
-        Debug.Log($"풀 리셋 완료: {resetCount}개 오브젝트 리셋됨");
     }
 }
