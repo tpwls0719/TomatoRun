@@ -1,9 +1,8 @@
 using UnityEngine;
+using System.Collections;
 
 public class PlayerController : MonoBehaviour
 {
-    //public AudioClip deathClip;
-
     public float jumpForce = 500f;
 
     private int jumpCount = 0;
@@ -13,141 +12,156 @@ public class PlayerController : MonoBehaviour
     private Rigidbody2D playerRigidbody;
     private Animator animator;
     private AudioSource playerAudio;
-    
+    private SpriteRenderer spriteRenderer;
+
     public int maxHealth = 3;
     private int currentHealth;
+
+    //  [추�] �도 관변    private float originalSpeed = 5f;
+    private float boostedSpeed;
+    private bool isSpeedBoosted = false;
+    private float speedBoostEndTime = 0f;
+
+    //  [추�] 무적 관변    private bool isInvincible = false;
+    private float invincibleEndTime = 0f;
+    public float invincibleDuration = 3f;
+
     void Start()
     {
-        //게임 오브젝트로부터 사용할 컴포넌트들을 가져와 변수에 할당
         playerRigidbody = GetComponent<Rigidbody2D>();
         animator = GetComponent<Animator>();
-        //playerAudio = GetComponent<AudioSource>();
+        spriteRenderer = GetComponent<SpriteRenderer>();
+        // playerAudio = GetComponent<AudioSource>();
 
         currentHealth = maxHealth;
+        boostedSpeed = originalSpeed;
     }
     
-    // 플레이어 상태를 초기화하는 메서드 (GameManager에서 호출)
+    // �레�어 �태�초기�하메서(GameManager�서 �출)
     public void ResetPlayerState()
     {
-        Debug.Log("플레이어 상태 초기화 시작");
+        Debug.Log("�레�어 �태 초기�작");
         
-        // 기본 상태 초기화
-        jumpCount = 0;
+        // 기본 �태 초기        jumpCount = 0;
         isGrounded = false;
         isDead = false;
         currentHealth = maxHealth;
         
-        // 물리 상태 초기화
-        if (playerRigidbody != null)
+        // 물리 �태 초기        if (playerRigidbody != null)
         {
             playerRigidbody.linearVelocity = Vector2.zero;
             playerRigidbody.angularVelocity = 0f;
         }
         
-        // 애니메이터 상태 초기화
-        if (animator != null)
+        // �니메이�태 초기        if (animator != null)
         {
             animator.SetBool("Grounded", isGrounded);
-            // 사망 상태에서 일반 상태로 복귀 (필요한 경우)
+            // �망 �태�서 �반 �태�복� (�요경우)
             animator.ResetTrigger("Die");
         }
         
-        Debug.Log("플레이어 상태 초기화 완료 - 체력: " + currentHealth + "/" + maxHealth);
+        Debug.Log("�레�어 �태 초기�료 - 체력: " + currentHealth + "/" + maxHealth);
     }
 
-    // Update is called once per frame
     void Update()
     {
-        if (isDead)
-        {
-            //사망 시 처리를 더 이상 진행하지 않고 종료
-            return;
-        }
+        if (isDead) return;
 
-        //마우스 왼쪽 버튼을 눌르고 최대 점프 횟수에 도달하지 않았다면
+        // �프
         if (Input.GetMouseButtonDown(0) && jumpCount < 2)
         {
-            //점프 횟수 증가
             jumpCount++;
-            //점프 직전에 속도를 순간적으로 제로로 변경
             playerRigidbody.linearVelocity = Vector2.zero;
-            //리지드바디에 위쪽으로 힘을 주기
             playerRigidbody.AddForce(new Vector2(0, jumpForce));
-            //오디오 소스 재생
-            //playerAudio.Play();
+            // playerAudio.Play();
         }
-        //애니메이터의 Grounded 파라미터를 isGrounded 값으로 갱신
-        animator.SetBool("Grounded", isGrounded);
 
+        //  부�트 �간 종료 체크
+        if (isSpeedBoosted && Time.time >= speedBoostEndTime)
+        {
+            isSpeedBoosted = false;
+            boostedSpeed = originalSpeed;
+            Debug.Log("�️ 부�트 종료");
+        }
+
+        //  무적 �간 종료 체크
+        if (isInvincible && Time.time >= invincibleEndTime)
+        {
+            isInvincible = false;
+            StopCoroutine("BlinkEffect");
+            spriteRenderer.enabled = true;
+            Debug.Log("���무적 �제");
+        }
+
+        Move();
+
+        animator.SetBool("Grounded", isGrounded);
     }
+
+    //  좌우 �동
+    void Move()
+    {
+        float moveInput = Input.GetAxis("Horizontal");
+        Vector3 movement = new Vector3(moveInput * boostedSpeed * Time.deltaTime, 0f, 0f);
+        transform.Translate(movement);
+    }
+
     private void Die()
     {
-        //애니메이터의 Die 트리거 파라미터를 셋
         animator.SetTrigger("Die");
-
-        //오디오 소스에 할당된 오디오 클립을 deathClip으로 변경
-        //playerAudio.clip = deathClip;
-        //사망 효과음 재생
-        //playerAudio.Play();
-
-        // 속도를 제로(0, 0)로 변경
         playerRigidbody.linearVelocity = Vector2.zero;
-        // 사망 상태를 true로 변경
         isDead = true;
 
-        // 게임 매니저의 게임 오버 처리 실행
-        GameManager.Instance.GameOver();
+        // GameManager.instance.EndGame();
     }
 
     private void TakeDamage(int damage)
     {
-        Debug.Log("TakeDamage 메서드 호출됨! 데미지: " + damage);
+        Debug.Log("TakeDamage 메서�출 ��지: " + damage);
         
-        // 무적 상태 확인
+        // 무적 �태 �인
         InvincibilityItem invincibilityController = GetComponent<InvincibilityItem>();
         if (invincibilityController != null && invincibilityController.IsInvincible)
         {
-            Debug.Log("무적 상태이므로 데미지를 받지 않습니다!");
+            Debug.Log("무적 �태��롰�지�받� �습�다!");
             return;
         }
         
-        Debug.Log("장애물과 충돌! UIManager로 데미지 처리");
+        Debug.Log("�애물과 충돌! UIManager롰�지 처리");
 
-        // UIManager를 통해 하트 UI 업데이트 (UIManager에서 하트 개수와 게임오버 관리)
+
+        // UIManager륵해 �트 UI �데�트 (UIManager�서 �트 개수� 게임�버 관�
         if (UIManager.Instance != null)
         {
-            Debug.Log("UIManager.Instance 찾음. TakeDamage 호출");
+            Debug.Log("UIManager.Instance 찾음. TakeDamage �출");
             UIManager.Instance.TakeDamage();
         }
         else
         {
-            Debug.LogError("UIManager.Instance가 null입니다! UIManager가 씬에 있는지 확인하세요.");
+            Debug.LogError("UIManager.Instance가 null�니 UIManager가 �에 �는지 �인�세");
         }
     }
 
     private void OnTriggerEnter2D(Collider2D other)
     {
-        Debug.Log("OnTriggerEnter2D 호출됨! 충돌한 오브젝트: " + other.name + ", 태그: " + other.tag);
+        Debug.Log("OnTriggerEnter2D �출 충돌�브�트: " + other.name + ", �그: " + other.tag);
         
         if (other.tag == "Dead" && !isDead)
         {
-            // 충돌한 상대방의 태그가 Dead이며 아직 사망하지 않았다면 Die() 실행
             Debug.Log("죽음");
             Die();
         }
         else if (other.tag == "Hit" && !isDead)
         {
-            Debug.Log("Hit 태그 장애물과 충돌! TakeDamage 호출");
+            Debug.Log("Hit �그 �애물과 충돌! TakeDamage �출");
             TakeDamage(1); // 체력 1 깎기
         }
     }
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
-        // 어떤 콜라이더와 닿았으며, 충돌 표면이 위쪽을 보고 있으면
         if (collision.contacts[0].normal.y > 0.7f)
         {
-            // isGrounded를 true로 변경하고, 누적 점프 횟수를 0으로 리셋
             isGrounded = true;
             jumpCount = 0;
         }
@@ -155,7 +169,43 @@ public class PlayerController : MonoBehaviour
 
     private void OnCollisionExit2D(Collision2D collision)
     {
-        // 어떤 콜라이더에서 떼어진 경우 isGrounded를 false로 변경
-        isGrounded = false; 
+        isGrounded = false;
+    }
+
+    // �︇빛 �이�과
+    public void ExtendMaxHealth(int amount)
+    {
+        maxHealth += amount;
+        currentHealth += amount;
+        Debug.Log("�︇빛�로 체력 �장! �재 최� 체력: " + maxHealth);
+    }
+
+    // �도 부�트
+    public void ActivateSpeedBoost(float multiplier, float duration)
+    {
+        boostedSpeed = originalSpeed * multiplier;
+        isSpeedBoosted = true;
+        speedBoostEndTime = Time.time + duration;
+        Debug.Log(" �도 증�! 지�간: " + duration + "�);
+    }
+
+    //  무적 모드 �성�수
+    public void SetInvincible(float duration)
+    {
+        isInvincible = true;
+        invincibleEndTime = Time.time + duration;
+        StartCoroutine(BlinkEffect());
+        Debug.Log("���무적 �작! " + duration + "촙안");
+    }
+
+    // 반짝�과 코루    IEnumerator BlinkEffect()
+    {
+        while (isInvincible)
+        {
+            spriteRenderer.enabled = !spriteRenderer.enabled;
+            yield return new WaitForSeconds(1f);
+        }
+
+        spriteRenderer.enabled = true;
     }
 }
