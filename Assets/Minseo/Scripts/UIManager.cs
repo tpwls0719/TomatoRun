@@ -265,6 +265,18 @@ public class UIManager : MonoBehaviour
     {
         // 게임이 이미 클리어된 상태면 게임 오버 처리 안함
         if (gameCleared) return;
+        
+        // GameManager에 게임 오버 상태 알림
+        GameManager gameManager = FindFirstObjectByType<GameManager>();
+        if (gameManager != null)
+        {
+            gameManager.EndGame();
+            Debug.Log("GameManager에 게임 오버 상태 알림");
+        }
+        else
+        {
+            Debug.LogWarning("GameManager를 찾을 수 없습니다!");
+        }
                 
         // 최고 점수 최종 저장
         if (currentScore > bestScore)
@@ -280,6 +292,11 @@ public class UIManager : MonoBehaviour
         if (gameOverUI != null)
         {
             gameOverUI.SetActive(true);
+            Debug.Log("게임 오버 UI 활성화됨");
+        }
+        else
+        {
+            Debug.LogWarning("게임 오버 UI가 설정되지 않았습니다!");
         }
         
         // 게임 시간 정지
