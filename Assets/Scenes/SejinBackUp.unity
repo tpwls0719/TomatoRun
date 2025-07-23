@@ -429,7 +429,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &103233718
 RectTransform:
   m_ObjectHideFlags: 0
@@ -2028,6 +2028,10 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 1461907429}
     - target: {fileID: 8938751877429409183, guid: abbf93004925b2d4bb0f0b1133c45122, type: 3}
+      propertyPath: gameClearUI
+      value: 
+      objectReference: {fileID: 1205101924}
+    - target: {fileID: 8938751877429409183, guid: abbf93004925b2d4bb0f0b1133c45122, type: 3}
       propertyPath: bestScoreText
       value: 
       objectReference: {fileID: 1158741954}
@@ -2035,6 +2039,10 @@ PrefabInstance:
       propertyPath: gameOverScoreText
       value: 
       objectReference: {fileID: 162751101}
+    - target: {fileID: 8938751877429409183, guid: abbf93004925b2d4bb0f0b1133c45122, type: 3}
+      propertyPath: gameClearScoreText
+      value: 
+      objectReference: {fileID: 1572974419}
     - target: {fileID: 8938751877429409183, guid: abbf93004925b2d4bb0f0b1133c45122, type: 3}
       propertyPath: heartImages.Array.size
       value: 3
@@ -2649,9 +2657,7 @@ MonoBehaviour:
   pillPoolCount: 5
   sunlightPoolCount: 3
   maxPillsPerStage: 3
-  maxSunlightPerStage: 1
   platformsPerStage: 10
-  totalGameStages: 4
   obstacleLayerMask:
     serializedVersion: 2
     m_Bits: 0
@@ -2938,9 +2944,7 @@ MonoBehaviour:
   pillPoolCount: 5
   sunlightPoolCount: 3
   maxPillsPerStage: 3
-  maxSunlightPerStage: 1
   platformsPerStage: 10
-  totalGameStages: 4
   obstacleLayerMask:
     serializedVersion: 2
     m_Bits: 0
@@ -3177,6 +3181,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!1 &1205101924 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 5010846854927078899, guid: abbf93004925b2d4bb0f0b1133c45122, type: 3}
+  m_PrefabInstance: {fileID: 687306282}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1212983283
 GameObject:
   m_ObjectHideFlags: 0
@@ -3741,6 +3750,17 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 581245740838140918, guid: fcb58bd0787b98845ab5d5d459e8c977, type: 3}
   m_PrefabInstance: {fileID: 1491981131}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &1572974419 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 7497751025972157978, guid: abbf93004925b2d4bb0f0b1133c45122, type: 3}
+  m_PrefabInstance: {fileID: 687306282}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1586865140
 GameObject:
   m_ObjectHideFlags: 0
@@ -3796,9 +3816,7 @@ MonoBehaviour:
   pillPoolCount: 5
   sunlightPoolCount: 3
   maxPillsPerStage: 3
-  maxSunlightPerStage: 1
   platformsPerStage: 10
-  totalGameStages: 4
   obstacleLayerMask:
     serializedVersion: 2
     m_Bits: 0
@@ -3934,9 +3952,7 @@ MonoBehaviour:
   pillPoolCount: 5
   sunlightPoolCount: 3
   maxPillsPerStage: 3
-  maxSunlightPerStage: 1
   platformsPerStage: 10
-  totalGameStages: 4
   obstacleLayerMask:
     serializedVersion: 2
     m_Bits: 0

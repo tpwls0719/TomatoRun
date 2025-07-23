@@ -133,7 +133,7 @@ public class PlayerController : MonoBehaviour
         isDead = true;
 
 
-        GameManager.Instance.SetGameOver();
+        GameManager.Instance.EndGame();
 
     }
 
