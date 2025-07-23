@@ -7,6 +7,9 @@ TagManager:
   - Dead
   - Item
   - Hit
+  - Water
+  - Pill
+  - Sunlight
   layers:
   - Default
   - TransparentFX
@@ -14,7 +17,7 @@ TagManager:
   - 
   - Water
   - UI
-  - 
+  - Player
   - 
   - 
   - 
@@ -52,6 +55,9 @@ TagManager:
     locked: 0
   - name: Foreground
     uniqueID: 375182127
+    locked: 0
+  - name: Player
+    uniqueID: 1343695789
     locked: 0
   m_RenderingLayers:
   - Default
