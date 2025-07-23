@@ -27,11 +27,23 @@ public class UIManager : MonoBehaviour
     public GameObject gameOverUI;        // 게임 오버 UI 패널 (GameManager에서도 접근 가능)
     public TextMeshProUGUI gameOverScoreText;  // 게임 오버 시 현재 점수 표시
     
+    [Header("게임 클리어 UI")]
+    public GameObject gameClearUI;       // 게임 클리어 UI 패널
+    public TextMeshProUGUI gameClearScoreText;  // 게임 클리어 시 현재 점수 표시
+    
     [Header("설정")]
     public float stageDuration = 30f;
     public int maxStages = 5;
     
     private float gameTime = 0f;
+    private bool gameCleared = false;  // 게임 클리어 상태 체크
+    
+    // 데미지 처리 중복 방지용 변수
+    private float lastDamageTime = 0f;
+    private float damageCooldown = 1f;  // 1초 쿨다운
+    
+    // 다른 스크립트에서 게임 시간에 접근할 수 있도록 프로퍼티 추가
+    public float GameTime { get { return gameTime; } }
     
     public static UIManager Instance { get; private set; }  // 싱글톤 인스턴스
     
@@ -61,6 +73,12 @@ public class UIManager : MonoBehaviour
         {
             gameOverUI.SetActive(false);
         }
+        
+        // 게임 클리어 UI 초기화
+        if (gameClearUI != null)
+        {
+            gameClearUI.SetActive(false);
+        }
     }
 
     void Update()
@@ -71,7 +89,7 @@ public class UIManager : MonoBehaviour
     
     void UpdateIconPosition()
     {
-        if (characterIcon == null || sliderBackground == null) return;
+        if (characterIcon == null || sliderBackground == null || gameCleared) return;
         
         gameTime += Time.deltaTime;
         
@@ -84,6 +102,14 @@ public class UIManager : MonoBehaviour
         float x = (-width / 2f) + (progress * width);
         
         characterIcon.anchoredPosition = new Vector2(x, characterIcon.anchoredPosition.y);
+        
+        // 게임 클리어 체크 - 아이콘이 슬라이더 끝에 도달하면 클리어
+        float sliderEndPosition = width / 2f; // 슬라이더 오른쪽 끝 위치
+        if (x >= sliderEndPosition - 20f && !gameCleared) // 20픽셀 여유를 두고 클리어 체크 (슬라이더 끝 근처에서 클리어)
+        {
+            Debug.Log($"게임 클리어! 아이콘 위치: {x:F1}, 슬라이더 끝: {sliderEndPosition:F1}");
+            GameClear();
+        }
     }
     
     // 점수 업데이트 메서드
@@ -140,9 +166,29 @@ public class UIManager : MonoBehaviour
     // 알약(무적) 아이템 획득 처리
     public void CollectPill()
     {
-        // InvincibilityItem.cs에서 이미 무적 모드 활성화를 처리하므로 
-        // 여기서는 추가 로직만 필요하다면 추가 (현재는 불필요)
-        Debug.Log("알약 획득 - UIManager에서 처리됨");
+        Debug.Log("알약 획득 - 무적 모드 발동!");
+        
+        // ItemSpawner에 알약 수집 알림 (스폰 제한 해제)
+        if (ItemSpawner.Instance != null)
+        {
+            ItemSpawner.Instance.OnPillCollected();
+            Debug.Log("ItemSpawner에 알약 수집 알림 전송됨");
+        }
+        else
+        {
+            Debug.LogWarning("ItemSpawner.Instance가 null입니다!");
+        }
+        
+        if (invincibilityController != null)
+        {
+            // 이 메서드는 InvincibilityItem 스크립트에서  
+            // 무적 상태 시작을 담당하는 함수라고 가정
+            invincibilityController.ActivateInvincibility();  
+        }
+        else
+        {
+            Debug.LogWarning("InvincibilityItem 컨트롤러가 연결되지 않았습니다!");
+        }
     }
     
     // 햇빛(생명) 아이템 획득 처리
@@ -161,14 +207,17 @@ public class UIManager : MonoBehaviour
         }
     }
     
-    // 장애물 충돌 처리 (생명 감소)
+    // 장애물 충돌 처리 (생명 감소) - 데미지 처리 중복 방지
     public void TakeDamage()
     {
-        Debug.Log("UIManager.TakeDamage 호출됨!");
-        Debug.Log($"invincibilityController null? {invincibilityController == null}");
-        if (invincibilityController != null)
+        // 게임이 클리어된 상태면 데미지 처리 안함
+        if (gameCleared) return;
+        
+        // 쿨다운 체크 - 마지막 데미지로부터 1초가 지나지 않았으면 무시
+        if (Time.time - lastDamageTime < damageCooldown)
         {
-            Debug.Log($"무적 상태? {invincibilityController.IsInvincible}");
+            Debug.Log("데미지 쿨다운 중 - 무시됨");
+            return;
         }
         
         // 무적 상태가 아닐 때만 데미지 처리
@@ -176,6 +225,7 @@ public class UIManager : MonoBehaviour
         {
             currentHearts--;
             UpdateHeartDisplay();
+            lastDamageTime = Time.time; // 데미지 시간 기록
             
             Debug.Log($"하트 감소! 현재 하트: {currentHearts}/{maxHearts}");
             
@@ -191,17 +241,21 @@ public class UIManager : MonoBehaviour
         }
     }
     
-    // 하트 UI 업데이트
-    void UpdateHeartDisplay()
+    // 하트 UI 업데이트 - 기존 메서드와 매개변수 있는 메서드 통합
+    public void UpdateHeartDisplay()
+    {
+        UpdateHeartDisplay(currentHearts);
+    }
+    
+    public void UpdateHeartDisplay(int currentHealth)
     {
         if (heartImages == null || heartImages.Length == 0) return;
-        
-        // 하트 이미지 활성화/비활성화
+
         for (int i = 0; i < heartImages.Length; i++)
         {
             if (heartImages[i] != null)
             {
-                heartImages[i].enabled = (i < currentHearts);
+                heartImages[i].enabled = (i < currentHealth);
             }
         }
     }
@@ -209,6 +263,16 @@ public class UIManager : MonoBehaviour
     // 게임 오버 처리
     public void GameOver()
     {
+        // 게임이 이미 클리어된 상태면 게임 오버 처리 안함
+        if (gameCleared) return;
+        
+        // GameManager에 게임 오버 상태 알림
+        GameManager gameManager = FindFirstObjectByType<GameManager>();
+        if (gameManager != null)
+        {
+            gameManager.SetGameOver();
+        }
+        
         // 최고 점수 최종 저장
         if (currentScore > bestScore)
         {
@@ -231,6 +295,44 @@ public class UIManager : MonoBehaviour
         Debug.Log($"게임 오버! 최종 점수: {currentScore}, 최고 점수: {bestScore}");
     }
     
+    // 게임 클리어 처리
+    public void GameClear()
+    {
+        gameCleared = true;
+        
+        // GameManager에 게임 클리어 상태 알림
+        GameManager gameManager = FindFirstObjectByType<GameManager>();
+        if (gameManager != null)
+        {
+            gameManager.SetGameCleared();
+        }
+        
+        // 클리어 보너스 점수 추가 (예: 1000점)
+        int clearBonus = 1000;
+        UpdateScore(clearBonus);
+        
+        // 최고 점수 최종 저장
+        if (currentScore > bestScore)
+        {
+            bestScore = currentScore;
+            SaveBestScore();
+        }
+        
+        // 게임 클리어 UI에 현재 점수 표시
+        UpdateGameClearScore();
+        
+        // 게임 클리어 UI 표시
+        if (gameClearUI != null)
+        {
+            gameClearUI.SetActive(true);
+        }
+        
+        // 게임 시간 정지
+        Time.timeScale = 0f;
+        
+        Debug.Log($"게임 클리어! 최종 점수: {currentScore} (클리어 보너스: +{clearBonus}), 최고 점수: {bestScore}");
+    }
+    
     // 게임 재시작 (게임 오버 UI에서 호출)
     public void RestartGame()
     {
@@ -245,10 +347,22 @@ public class UIManager : MonoBehaviour
         currentHearts = maxHearts;
         UpdateHeartDisplay();
         
+        // 게임 클리어 상태 리셋
+        gameCleared = false;
+        
+        // 데미지 쿨다운 리셋
+        lastDamageTime = 0f;
+        
         // 게임 오버 UI 숨기기
         if (gameOverUI != null)
         {
             gameOverUI.SetActive(false);
+        }
+        
+        // 게임 클리어 UI 숨기기
+        if (gameClearUI != null)
+        {
+            gameClearUI.SetActive(false);
         }
         
         Debug.Log("게임 재시작!");
@@ -263,6 +377,12 @@ public class UIManager : MonoBehaviour
         if (gameOverUI != null)
         {
             gameOverUI.SetActive(false);
+        }
+        
+        // 게임 클리어 UI 먼저 끄기
+        if (gameClearUI != null)
+        {
+            gameClearUI.SetActive(false);
         }
         
         // GameManager를 안전하게 찾아서 재시작
@@ -289,6 +409,12 @@ public class UIManager : MonoBehaviour
             gameOverUI.SetActive(false);
         }
         
+        // 게임 클리어 UI 먼저 끄기
+        if (gameClearUI != null)
+        {
+            gameClearUI.SetActive(false);
+        }
+        
         // GameManager를 안전하게 찾아서 빠른 재시작
         GameManager gameManager = FindFirstObjectByType<GameManager>();
         if (gameManager != null)
@@ -307,7 +433,7 @@ public class UIManager : MonoBehaviour
     {
         if (gameOverScoreText != null)
         {
-            gameOverScoreText.text = currentScore.ToString();
+            gameOverScoreText.text = "점수 : " + currentScore.ToString();
             Debug.Log($"게임 오버 점수 UI 업데이트: {currentScore}점");
         }
         else
@@ -316,10 +442,26 @@ public class UIManager : MonoBehaviour
         }
     }
     
+    // 게임 클리어 UI에 현재 점수 업데이트
+    void UpdateGameClearScore()
+    {
+        if (gameClearScoreText != null)
+        {
+            gameClearScoreText.text = "점수 : " + currentScore.ToString();
+            Debug.Log($"게임 클리어 점수 UI 업데이트: {currentScore}점");
+        }
+        else
+        {
+            Debug.LogWarning("게임 클리어 점수 텍스트가 설정되지 않았습니다!");
+        }
+    }
+    
     // 게임 시간 리셋 메서드
     public void ResetGameTime()
     {
         gameTime = 0f;
+        gameCleared = false;  // 게임 클리어 상태도 리셋
+        lastDamageTime = 0f;  // 데미지 쿨다운도 리셋
         Debug.Log("게임 시간이 0으로 리셋되었습니다");
     }
 }
