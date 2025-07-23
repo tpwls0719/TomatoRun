@@ -207,40 +207,6 @@ public class UIManager : MonoBehaviour
         }
     }
     
-    // 장애물 충돌 처리 (생명 감소) - 데미지 처리 중복 방지
-    public void TakeDamage()
-    {
-        // 게임이 클리어된 상태면 데미지 처리 안함
-        if (gameCleared) return;
-        
-        // 쿨다운 체크 - 마지막 데미지로부터 1초가 지나지 않았으면 무시
-        if (Time.time - lastDamageTime < damageCooldown)
-        {
-            Debug.Log("데미지 쿨다운 중 - 무시됨");
-            return;
-        }
-        
-        // 무적 상태가 아닐 때만 데미지 처리
-        if (invincibilityController == null || !invincibilityController.IsInvincible)
-        {
-            currentHearts--;
-            UpdateHeartDisplay();
-            lastDamageTime = Time.time; // 데미지 시간 기록
-            
-            Debug.Log($"하트 감소! 현재 하트: {currentHearts}/{maxHearts}");
-            
-            // 생명이 0이 되면 게임 오버
-            if (currentHearts <= 0)
-            {
-                GameOver();
-            }
-        }
-        else
-        {
-            Debug.Log("무적 상태이므로 데미지를 받지 않습니다!");
-        }
-    }
-    
     // 하트 UI 업데이트 - 기존 메서드와 매개변수 있는 메서드 통합
     public void UpdateHeartDisplay()
     {
@@ -265,18 +231,6 @@ public class UIManager : MonoBehaviour
     {
         // 게임이 이미 클리어된 상태면 게임 오버 처리 안함
         if (gameCleared) return;
-        
-        // GameManager에 게임 오버 상태 알림
-        GameManager gameManager = FindFirstObjectByType<GameManager>();
-        if (gameManager != null)
-        {
-            gameManager.EndGame();
-            Debug.Log("GameManager에 게임 오버 상태 알림");
-        }
-        else
-        {
-            Debug.LogWarning("GameManager를 찾을 수 없습니다!");
-        }
                 
         // 최고 점수 최종 저장
         if (currentScore > bestScore)
@@ -292,11 +246,6 @@ public class UIManager : MonoBehaviour
         if (gameOverUI != null)
         {
             gameOverUI.SetActive(true);
-            Debug.Log("게임 오버 UI 활성화됨");
-        }
-        else
-        {
-            Debug.LogWarning("게임 오버 UI가 설정되지 않았습니다!");
         }
         
         // 게임 시간 정지
