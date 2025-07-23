@@ -9,7 +9,7 @@ public class Stage : MonoBehaviour
     public GameObject[] Stages;
 
     private float timer = 0f;
-    private float stageDuration = 10f;
+    private float stageDuration = 35f;
     private int totalPoint = 0;
 
     // 🔽 추가: 페이드용 오브젝트
@@ -51,7 +51,7 @@ public class Stage : MonoBehaviour
             yield return null;
         }
         fadePanel.alpha = 1f;
-        yield return new WaitForSeconds(3f); // 어두운 화면 유지 시간
+        yield return new WaitForSeconds(1f); // 어두운 화면 유지 시간
     }
 
     IEnumerator FadeOut()

@@ -1002,6 +1002,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   scoreValue: 100
+  collectionEffect: {fileID: 0}
+  effectDuration: 1
+  collectionSound: {fileID: 0}
 --- !u!61 &353177132
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -2917,6 +2920,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   scoreValue: 100
+  collectionEffect: {fileID: 0}
+  effectDuration: 1
+  collectionSound: {fileID: 0}
 --- !u!61 &1336781539
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -3625,6 +3631,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   jumpForce: 400
   maxHealth: 3
+  invincibleDuration: 3
 --- !u!58 &1964213717
 CircleCollider2D:
   m_ObjectHideFlags: 0
@@ -3747,7 +3754,7 @@ Transform:
   m_GameObject: {fileID: 1964213714}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -6.41, y: 0, z: 0}
+  m_LocalPosition: {x: -6.41, y: -1.44, z: 0}
   m_LocalScale: {x: 0.5, y: 0.5, z: 0.5}
   m_ConstrainProportionsScale: 1
   m_Children:
@@ -3767,15 +3774,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   invincibilityDuration: 5
-  blinkInterval: 0.15
-  invincibilityColor: {r: 1, g: 0.8, b: 0, a: 0.7}
-  warningTime: 1.5
-  warningBlinkSpeed: 0.1
   invincibilityStartSound: {fileID: 0}
   invincibilityEndSound: {fileID: 0}
-  invincibilityTextObject: {fileID: 54099349}
-  textShakeAmount: 0.1
-  textShakeSpeed: 10
+  invincibilityTextName: InvincibilityText
+  pillEffectName: PillEffect_01
   obstacleKnockbackForce: 10
   obstacleRotationForce: 300
   obstacleDestroyDelay: 2
@@ -3826,6 +3828,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   scoreValue: 100
+  collectionEffect: {fileID: 0}
+  effectDuration: 1
+  collectionSound: {fileID: 0}
 --- !u!61 &2033732907
 BoxCollider2D:
   m_ObjectHideFlags: 0

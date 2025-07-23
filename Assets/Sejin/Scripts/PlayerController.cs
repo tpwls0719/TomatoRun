@@ -3,6 +3,7 @@ using System.Collections;
 
 public class PlayerController : MonoBehaviour
 {
+    public AudioClip deathClip;
     public float jumpForce = 500f;
 
     private int jumpCount = 0;
@@ -72,14 +73,19 @@ public class PlayerController : MonoBehaviour
     {
         if (isDead) return;
 
-        // 점프
+        //마우스 왼쪽 버튼을 눌르고 최대 점프 횟수에 도달하지 않았다면
         if (Input.GetMouseButtonDown(0) && jumpCount < 2)
         {
+            //점프 횟수 증가
             jumpCount++;
+            //점프 직전에 속도를 순간적으로 제로로 변경
             playerRigidbody.linearVelocity = Vector2.zero;
+            //리지드바디에 위쪽으로 힘을 주기
             playerRigidbody.AddForce(new Vector2(0, jumpForce));
-            // playerAudio.Play();
+            //오디오 소스 재생
+            playerAudio.Play();
         }
+        animator.SetBool("Grounded", isGrounded);
 
         // 속도 부스트 시간 종료 체크
         if (isSpeedBoosted && Time.time >= speedBoostEndTime)
@@ -100,7 +106,7 @@ public class PlayerController : MonoBehaviour
 
         Move();
 
-        animator.SetBool("Grounded", isGrounded);
+        
     }
 
     // 좌우 이동
@@ -113,38 +119,49 @@ public class PlayerController : MonoBehaviour
 
     private void Die()
     {
+         //애니메이터의 Die 트리거 파라미터를 셋
         animator.SetTrigger("Die");
+
+        //오디오 소스에 할당된 오디오 클립을 deathClip으로 변경
+        playerAudio.clip = deathClip;
+        //사망 효과음 재생
+        playerAudio.Play();
+
+        // 속도를 제로(0, 0)로 변경
         playerRigidbody.linearVelocity = Vector2.zero;
+        // 사망 상태를 true로 변경
         isDead = true;
+
 
         // GameManager.instance.EndGame();
     }
 
     private void TakeDamage(int damage)
-    {
-        Debug.Log("TakeDamage 메서드 호출 - 데미지: " + damage);
-        
-        // 무적 상태 확인
-        InvincibilityItem invincibilityController = GetComponent<InvincibilityItem>();
-        if (invincibilityController != null && invincibilityController.IsInvincible)
-        {
-            Debug.Log("무적 상태로 인해 데미지를 받지 않습니다!");
-            return;
-        }
-        
-        Debug.Log("장애물과 충돌! UIManager로 데미지 처리");
+{
+    Debug.Log("TakeDamage 메서드 호출 - 데미지: " + damage);
 
-        // UIManager를 통해 하트 UI 업데이트 (UIManager에서 하트 개수와 게임오버 관리)
-        if (UIManager.Instance != null)
-        {
-            Debug.Log("UIManager.Instance 찾음. TakeDamage 호출");
-            UIManager.Instance.TakeDamage();
-        }
-        else
-        {
-            Debug.LogError("UIManager.Instance가 null입니다. UIManager가 씬에 있는지 확인하세요");
-        }
+    InvincibilityItem invincibilityController = GetComponent<InvincibilityItem>();
+    if (invincibilityController != null && invincibilityController.IsInvincible)
+    {
+        Debug.Log("무적 상태로 인해 데미지를 받지 않습니다!");
+        return;
     }
+
+    currentHealth -= damage;
+
+    // UIManager에 현재 체력 상태를 전달
+    if (UIManager.Instance != null)
+    {
+        //UIManager.Instance.UpdateHeartDisplay(currentHealth);
+    }
+
+    if (currentHealth <= 0 && !isDead)
+    {
+        Die();
+    }
+}
+
+
 
     private void OnTriggerEnter2D(Collider2D other)
     {
@@ -155,7 +172,8 @@ public class PlayerController : MonoBehaviour
             Debug.Log("죽음");
             Die();
         }
-        else if (other.tag == "Hit" && !isDead)
+
+        if (other.tag == "Hit" && !isDead)
         {
             Debug.Log("Hit 태그 장애물과 충돌! TakeDamage 호출");
             TakeDamage(1); // 체력 1 깎기
@@ -164,8 +182,10 @@ public class PlayerController : MonoBehaviour
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
+        // 어떤 콜라이더와 닿았으며, 충돌 표면이 위쪽을 보고 있으면
         if (collision.contacts[0].normal.y > 0.7f)
         {
+            // isGrounded를 true로 변경하고, 누적 점프 횟수를 0으로 리셋
             isGrounded = true;
             jumpCount = 0;
         }
@@ -173,9 +193,11 @@ public class PlayerController : MonoBehaviour
 
     private void OnCollisionExit2D(Collision2D collision)
     {
-        isGrounded = false;
+        // 어떤 콜라이더에서 떼어진 경우 isGrounded를 false로 변경
+        isGrounded = false; 
     }
 
+    
     // 햇빛 아이템 효과
     public void ExtendMaxHealth(int amount)
     {
