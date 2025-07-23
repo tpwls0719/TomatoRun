@@ -123,21 +123,19 @@ public class InvincibilityItem : MonoBehaviour
             if (!other.gameObject.activeSelf)
                 return;
                 
-            // 이미 처리된 아이템인지 확인 (중복 방지)
-            if (other.GetComponent<Collider2D>().isTrigger == false)
-                return;
-                
-            Debug.Log("알약 아이템 획득: " + other.gameObject.name);
+            Debug.Log("알약 아이템 발견: " + other.gameObject.name + " - 충돌 처리 시작");
             
             // 충돌체를 즉시 비활성화하여 중복 충돌 방지
             Collider2D pillCollider = other.GetComponent<Collider2D>();
             if (pillCollider != null)
             {
                 pillCollider.enabled = false;
+                Debug.Log("알약 충돌체 비활성화됨");
             }
             
             // 무적 상태 활성화
             ActivateInvincibility();
+            Debug.Log("무적 상태 활성화 요청됨");
             
             // 아이템 비활성화 전에 부모 관계 해제 (충돌 문제 방지)
             other.transform.SetParent(null);
@@ -146,6 +144,11 @@ public class InvincibilityItem : MonoBehaviour
             if (UIManager.Instance != null)
             {
                 UIManager.Instance.CollectPill();
+                Debug.Log("UIManager에 알약 획득 알림 전송됨");
+            }
+            else
+            {
+                Debug.LogWarning("UIManager.Instance가 null입니다!");
             }
             
             // 약간의 지연 후 아이템 비활성화 (충돌 처리 완료 보장)
@@ -169,7 +172,43 @@ public class InvincibilityItem : MonoBehaviour
     // 일반 충돌 처리 - 장애물 충돌 시 무적 상태면 장애물이 날아가는 효과
     private void OnCollisionEnter2D(Collision2D collision)
     {
-        // 무적 상태일 때만 처리
+        // 알약 아이템과의 충돌 처리 (OnTriggerEnter2D가 작동하지 않을 경우를 대비)
+        if (collision.gameObject.CompareTag("Pill"))
+        {
+            Debug.Log("일반 충돌로 알약 발견: " + collision.gameObject.name);
+            
+            // 이미 비활성화된 아이템과 다시 충돌하는 것을 방지
+            if (!collision.gameObject.activeSelf)
+                return;
+            
+            // 충돌체를 즉시 비활성화하여 중복 충돌 방지
+            Collider2D pillCollider = collision.gameObject.GetComponent<Collider2D>();
+            if (pillCollider != null)
+            {
+                pillCollider.enabled = false;
+                Debug.Log("알약 충돌체 비활성화됨 (일반 충돌)");
+            }
+            
+            // 무적 상태 활성화
+            ActivateInvincibility();
+            Debug.Log("무적 상태 활성화 요청됨 (일반 충돌)");
+            
+            // 아이템 비활성화 전에 부모 관계 해제
+            collision.transform.SetParent(null);
+            
+            // UIManager에 알약 획득 알림
+            if (UIManager.Instance != null)
+            {
+                UIManager.Instance.CollectPill();
+                Debug.Log("UIManager에 알약 획득 알림 전송됨 (일반 충돌)");
+            }
+            
+            // 아이템 비활성화
+            StartCoroutine(DeactivateItemDelayed(collision.gameObject, 0.1f));
+            return;
+        }
+        
+        // 무적 상태일 때만 장애물 처리
         if (!isInvincible)
             return;
             

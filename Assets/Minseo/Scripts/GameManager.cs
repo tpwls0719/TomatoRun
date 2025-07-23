@@ -5,71 +5,29 @@ public class GameManager : MonoBehaviour
 {
     public static GameManager Instance { get; private set; }  // 싱글톤 인스턴스
     
-    [Header("게임 설정")]
+    [Header("게임 상태")]
     public bool isGameOver = false;
-    public bool isGamePaused = false;
+    public bool isGameCleared = false;
     
     private void Awake()
     {
-        // 싱글톤 패턴 구현 (DontDestroyOnLoad 제거)
+        // 싱글톤 패턴 구현
         if (Instance == null)
         {
             Instance = this;
-            // DontDestroyOnLoad 제거 - UI 오브젝트와의 충돌 방지
-            // DontDestroyOnLoad(gameObject);
         }
         else
         {
             Destroy(gameObject);
         }
     }
-    
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
-    {
-        // 게임 시작 시 초기화
-        InitializeGame();
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        // ESC 키로 게임 일시정지/재개
-        if (Input.GetKeyDown(KeyCode.Escape))
-        {
-            if (isGamePaused)
-            {
-                ResumeGame();
-            }
-            else
-            {
-                PauseGame();
-            }
-        }
-        
-        // R 키로 게임 재시작 (디버그용)
-        if (Input.GetKeyDown(KeyCode.R))
-        {
-            RestartGame();
-        }
-    }
-    
-    // 게임 초기화
-    private void InitializeGame()
-    {
-        isGameOver = false;
-        isGamePaused = false;
-        Time.timeScale = 1f;
-        
-        Debug.Log("게임 초기화 완료");
-    }
 
     // 게임 재시작 (씬 재로드)
-    
     public void Restart()
     {
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
+    
     public void RestartGame()
     {
         Debug.Log("게임 재시작 - 씬 재로드");
@@ -81,10 +39,12 @@ public class GameManager : MonoBehaviour
             uiManager.gameOverUI.SetActive(false);
         }
 
+        // 게임 상태 초기화
+        isGameOver = false;
+        isGameCleared = false;
+
         // 시간 정지 해제
         Time.timeScale = 1f;
-        isGameOver = false;
-        isGamePaused = false;
 
         // 현재 씬 재로드
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
@@ -102,10 +62,12 @@ public class GameManager : MonoBehaviour
             uiManager.gameOverUI.SetActive(false);
         }
         
+        // 게임 상태 초기화
+        isGameOver = false;
+        isGameCleared = false;
+        
         // 시간 정지 해제
         Time.timeScale = 1f;
-        isGameOver = false;
-        isGamePaused = false;
         
         // UIManager를 통한 재시작 - 안전한 방식으로
         if (uiManager != null)
@@ -122,52 +84,6 @@ public class GameManager : MonoBehaviour
         
         // 게임 오브젝트들 초기화
         ResetGameObjects();
-    }
-    
-    // 게임 일시정지
-    public void PauseGame()
-    {
-        isGamePaused = true;
-        Time.timeScale = 0f;
-        
-        Debug.Log("게임 일시정지");
-        
-        // 일시정지 UI 표시 (있는 경우)
-        // pauseUI.SetActive(true);
-    }
-    
-    // 게임 재개
-    public void ResumeGame()
-    {
-        isGamePaused = false;
-        Time.timeScale = 1f;
-        
-        Debug.Log("게임 재개");
-        
-        // 일시정지 UI 숨기기 (있는 경우)
-        // pauseUI.SetActive(false);
-    }
-    
-    // 게임 오버 처리
-    public void GameOver()
-    {
-        isGameOver = true;
-        
-        Debug.Log("GameManager - 게임 오버 처리 시작");
-        
-        // UIManager의 게임 오버 처리 호출 - 안전한 방식으로
-        UIManager uiManager = FindFirstObjectByType<UIManager>();
-        if (uiManager != null)
-        {
-            Debug.Log("UIManager를 통해 게임 오버 UI 표시");
-            uiManager.GameOver();
-        }
-        else
-        {
-            Debug.LogError("UIManager를 찾을 수 없습니다! 게임 오버 UI를 표시할 수 없습니다.");
-            // 최소한 게임 시간은 정지
-            Time.timeScale = 0f;
-        }
     }
     
     // 플레이어 위치 초기화
@@ -290,29 +206,35 @@ public class GameManager : MonoBehaviour
         Debug.Log("게임 오브젝트들 초기화 완료");
     }
     
-    // 메인 메뉴로 돌아가기
-    public void GoToMainMenu()
+    // 게임 오버 상태 설정
+    public void SetGameOver()
     {
-        Debug.Log("메인 메뉴로 이동");
-        
-        // 시간 정지 해제
-        Time.timeScale = 1f;
-        
-        // 메인 메뉴 씬 로드 (씬 이름을 실제 메인 메뉴 씬 이름으로 변경)
-        SceneManager.LoadScene("MainMenu");
+        isGameOver = true;
+        isGameCleared = false;
+        Debug.Log("GameManager: 게임 오버 상태로 설정됨");
     }
     
-    // 게임 종료
-    public void QuitGame()
+    // 게임 클리어 상태 설정
+    public void SetGameCleared()
     {
-        Debug.Log("게임 종료");
-        
-#if UNITY_EDITOR
-        // 에디터에서 플레이 모드 종료
-        UnityEditor.EditorApplication.isPlaying = false;
-#else
-        // 빌드된 게임에서 애플리케이션 종료
-        Application.Quit();
-#endif
+        isGameCleared = true;
+        isGameOver = false;
+        Debug.Log("GameManager: 게임 클리어 상태로 설정됨");
+    }
+    
+    // 게임 상태 확인 메서드들
+    public bool IsGameOver()
+    {
+        return isGameOver;
+    }
+    
+    public bool IsGameCleared()
+    {
+        return isGameCleared;
+    }
+    
+    public bool IsGameActive()
+    {
+        return !isGameOver && !isGameCleared;
     }
 }
