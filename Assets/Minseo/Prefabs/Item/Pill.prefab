@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 5837794918365906981}
   - component: {fileID: 5802417801688830714}
   - component: {fileID: -4960934905066417841}
+  - component: {fileID: 5312813083202260917}
   m_Layer: 0
   m_Name: Pill
   m_TagString: Pill
@@ -150,8 +151,20 @@ MonoBehaviour:
   invincibilityDuration: 5
   invincibilityStartSound: {fileID: 0}
   invincibilityEndSound: {fileID: 0}
-  invincibilityTextObject: {fileID: 8001059799695240129, guid: b2884de5ca33c3b4cb64c24849fe13b0, type: 3}
+  invincibilityTextName: InvincibilityText
   pillEffectName: PillEffect_01
   obstacleKnockbackForce: 10
   obstacleRotationForce: 300
   obstacleDestroyDelay: 2
+--- !u!114 &5312813083202260917
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4461089370840121222}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f503b5c8125f3e04daf5b2b6738f0fe9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
