@@ -133,7 +133,7 @@ public class PlayerController : MonoBehaviour
         isDead = true;
 
 
-        // GameManager.instance.EndGame();
+        GameManager.Instance.GameOver();
     }
 
     private void TakeDamage(int damage)
