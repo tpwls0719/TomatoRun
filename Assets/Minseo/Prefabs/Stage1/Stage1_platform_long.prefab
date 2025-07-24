@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 8835098367120076164}
   - component: {fileID: 2200403706287886743}
   - component: {fileID: 2712777125379591697}
-  - component: {fileID: 8145926303687280895}
+  - component: {fileID: 8503498189371584617}
   m_Layer: 0
   m_Name: Stage1_platform_long
   m_TagString: Untagged
@@ -156,7 +156,7 @@ MonoBehaviour:
   - {fileID: 2602895484412972917}
   - {fileID: 4758531086685682169}
   speed: 0
---- !u!114 &8145926303687280895
+--- !u!114 &8503498189371584617
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}

@@ -14,6 +14,8 @@ public class Stage : MonoBehaviour
 
     // 🔽 추가: 페이드용 오브젝트
     public CanvasGroup fadePanel;
+    
+    public PlatformSpawner platformSpawner; // 에디터에서 할당하거나 자동 연결
 
     public void NextStage()
     {
