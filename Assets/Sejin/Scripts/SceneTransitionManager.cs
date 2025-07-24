@@ -13,7 +13,7 @@ public class SceneTransitionManager : MonoBehaviour
         {
             Instance = this;
             DontDestroyOnLoad(gameObject);
-            SceneManager.sceneLoaded += OnSceneLoaded;  // 씬 로드 완료 이벤트 등록
+            SceneManager.sceneLoaded += OnSceneLoaded;
         }
         else
         {
@@ -31,16 +31,15 @@ public class SceneTransitionManager : MonoBehaviour
 
     void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
-        isTransitioning = false;  // 씬이 완전히 로드되면 전환 가능 상태로 변경
+        isTransitioning = false;
     }
 
-    // 메서드 이름 그대로 씬 전환 처리
-    public void ChangeScene(int sceneIndex)
+    public void LoadScene(string sceneName)
     {
         if (!isTransitioning)
         {
             isTransitioning = true;
-            SceneManager.LoadScene(sceneIndex);
+            SceneManager.LoadScene(sceneName);
         }
     }
 

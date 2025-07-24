@@ -9,12 +9,20 @@ public class GameManager : MonoBehaviour
     public bool isGameOver = false;
     public bool isGameCleared = false;
 
+    [Header("카메라 쉐이크 효과음")]
+    public AudioClip cameraShakeSound;
+    private AudioSource audioSource;
+
     private void Awake()
     {
         // 싱글톤 패턴 구현
         if (Instance == null)
         {
             Instance = this;
+            DontDestroyOnLoad(gameObject);
+            audioSource = GetComponent<AudioSource>();
+            if (audioSource == null)
+                audioSource = gameObject.AddComponent<AudioSource>();
         }
         else
         {
@@ -295,6 +303,11 @@ public class GameManager : MonoBehaviour
     
     private System.Collections.IEnumerator ShakeCameraCoroutine(float duration, float intensity)
     {
+        if (cameraShakeSound != null && audioSource != null)
+        {
+            audioSource.PlayOneShot(cameraShakeSound);
+            Debug.Log("카메라 쉐이크 효과음 재생");
+        }
         Camera mainCamera = Camera.main;
         if (mainCamera == null) yield break;
         

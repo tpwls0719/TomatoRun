@@ -40,28 +40,13 @@ public class AudioManager : MonoBehaviour
     }
 
     // ------------------
-    // BGM 재생
-    // ------------------
-    public void PlayBGM()
-    {
-        if (bgmClip == null || (bgmSource.clip == bgmClip && bgmSource.isPlaying)) return;
-
-        bgmSource.clip = bgmClip;
-        bgmSource.Play();
-    }
-
-    public void StopBGM()
-    {
-        bgmSource.Stop();
-    }
-
-    // ------------------
     // 효과음 재생
     // ------------------
     public void PlayGameOver()
     {
         if (gameOverClip != null && !sfxSource.isPlaying)
         {
+            StopBGM(); // 게임 오버 시 BGM 중지
             sfxSource.PlayOneShot(gameOverClip);
         }
     }
@@ -70,7 +55,33 @@ public class AudioManager : MonoBehaviour
     {
         if (gameClearClip != null && !sfxSource.isPlaying)
         {
+            StopBGM(); // 게임 클리어 시 BGM 중지
             sfxSource.PlayOneShot(gameClearClip);
         }
     }
+
+    private bool isBgmStopped = false;
+
+    public void PlayBGM()
+    {
+        if (isBgmStopped) return;
+
+        if (bgmClip == null || (bgmSource.clip == bgmClip && bgmSource.isPlaying)) return;
+
+        bgmSource.clip = bgmClip;
+        bgmSource.Play();
+    }
+
+    public void StopBGM()
+    {
+        isBgmStopped = true;
+        bgmSource.Stop();
+    }
+
+    public void ResumeBGM()
+    {
+        isBgmStopped = false;
+        PlayBGM();
+    }
+
 }
