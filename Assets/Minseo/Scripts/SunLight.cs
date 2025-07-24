@@ -5,91 +5,83 @@ public class SunLight : MonoBehaviour
 {
     [Header("이펙트 설정")]
     public string healEffectName = "ChargeEffect";  // 플레이어 자식 이펙트 오브젝트 이름
-    public float effectDuration = 3.0f;       // 이펙트 지속 시간 (3초)
-    
+    public float effectDuration = 3.0f;             // 이펙트 지속 시간 (3초)
+
     [Header("사운드 설정")]
-    public AudioClip collectionSound;         // 획득 시 재생할 사운드
-    
-    private AudioSource audioSource;          // 오디오 소스
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
+    public AudioClip collectionSound;               // 획득 시 재생할 사운드
+
+    private AudioSource audioSource;
+
     void Start()
     {
         // 오디오 소스 컴포넌트 찾기
         audioSource = GetComponent<AudioSource>();
         if (audioSource == null)
         {
-            // 없으면 새로 추가
             audioSource = gameObject.AddComponent<AudioSource>();
         }
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
+    void Update() { }
 
-    // 플레이어가 햇빛 아이템을 먹었을 때 생명력 회복
     private void OnTriggerEnter2D(Collider2D other)
     {
         if (other.CompareTag("Player"))
-    {
-        if (!gameObject.activeSelf)
-            return;
-
-        Debug.Log("햇빛 아이템 획득: " + gameObject.name);
-
-        // ⭐ 플레이어 체력 회복
-        PlayerController playerController = other.GetComponent<PlayerController>();
-        if (playerController != null)
         {
-            Debug.Log("Heal() 호출 직전 currentHealth: " + playerController.currentHealth);
-            playerController.Heal(1);
-        }
-        else
-        {
-            Debug.LogWarning("PlayerController 찾기 실패");
-        }
+            if (!gameObject.activeSelf)
+                return;
 
-        // 이펙트
-        if (!string.IsNullOrEmpty(healEffectName))
-        {
-            PlayHealEffect(other.gameObject);
-        }
+            Debug.Log("햇빛 아이템 획득: " + gameObject.name);
 
-        // 사운드
-        if (audioSource != null && collectionSound != null)
-        {
-            audioSource.PlayOneShot(collectionSound);
-        }
+            // ⭐ 플레이어 체력 회복
+            PlayerController playerController = other.GetComponent<PlayerController>();
+            if (playerController != null)
+            {
+                Debug.Log("Heal() 호출 직전 currentHealth: " + playerController.currentHealth);
+                playerController.Heal(1);
+            }
+            else
+            {
+                Debug.LogWarning("PlayerController 찾기 실패");
+            }
 
-        // UI 하트 반영 (optional)
-        if (UIManager.Instance != null)
-        {
-            UIManager.Instance.CollectSunlight(); // UI 하트 증가 처리
-        }
+            // 이펙트 재생
+            if (!string.IsNullOrEmpty(healEffectName))
+            {
+                PlayHealEffect(other.gameObject);
+            }
 
-        // 비활성화 (풀링)
-        gameObject.SetActive(false);
+            // 사운드 재생 (위치 기반, 임시 오디오 오브젝트 사용)
+            if (collectionSound != null)
+            {
+                Debug.Log("사운드 재생 시도: " + collectionSound.name);
+                PlayOneShot(transform.position);
+            }
+
+            // UI 하트 반영
+            if (UIManager.Instance != null)
+            {
+                UIManager.Instance.CollectSunlight();
+            }
+
+            // 비활성화 (풀링)
+            gameObject.SetActive(false);
+        }
     }
-    }
-    
-    // 플레이어에서 힐링 이펙트 재생
+
     private void PlayHealEffect(GameObject player)
     {
         if (!string.IsNullOrEmpty(healEffectName))
         {
-            // 플레이어 자식에서 힐링 이펙트 찾기
             Transform effectTransform = player.transform.Find(healEffectName);
-            
+
             if (effectTransform != null)
             {
                 GameObject effectObject = effectTransform.gameObject;
-                
-                // 이미 활성화된 이펙트가 있으면 먼저 정리
+
+                // 기존 이펙트 정리
                 if (effectObject.activeSelf)
                 {
-                    // 파티클 시스템 강제 정지
                     ParticleSystem existingParticles = effectObject.GetComponent<ParticleSystem>();
                     if (existingParticles != null)
                     {
@@ -97,38 +89,33 @@ public class SunLight : MonoBehaviour
                     }
                     effectObject.SetActive(false);
                 }
-                
+
                 // 이펙트 활성화
                 effectObject.SetActive(true);
-                
-                // 파티클 시스템이 있다면 재생
+
+                // 파티클 재생
                 ParticleSystem particles = effectObject.GetComponent<ParticleSystem>();
                 if (particles != null)
                 {
-                    particles.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear); // 완전 초기화
-                    particles.Play(); // 새로 시작
+                    particles.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+                    particles.Play();
                 }
-                
-                // 플레이어의 PlayerController에서 코루틴 실행 (더 안전함)
+
+                // 코루틴으로 일정 시간 후 비활성화
                 PlayerController playerController = player.GetComponent<PlayerController>();
                 if (playerController != null)
                 {
                     playerController.StartCoroutine(DeactivateEffectAfterDelay(effectObject, effectDuration));
-                    Debug.Log("PlayerController에서 햇빛 힐링 이펙트 코루틴 시작 - " + effectDuration + "초간");
                 }
                 else
                 {
-                    // 플레이어의 MonoBehaviour에서 코루틴 실행 (fallback)
                     MonoBehaviour playerMono = player.GetComponent<MonoBehaviour>();
                     if (playerMono != null)
                     {
                         playerMono.StartCoroutine(DeactivateEffectAfterDelay(effectObject, effectDuration));
-                        Debug.Log("플레이어 MonoBehaviour에서 햇빛 힐링 이펙트 코루틴 시작 - " + effectDuration + "초간");
                     }
                     else
                     {
-                        Debug.LogWarning("플레이어에 적절한 컴포넌트가 없어 이펙트 타이머를 설정할 수 없습니다.");
-                        // 최후의 수단: 즉시 비활성화
                         effectObject.SetActive(false);
                     }
                 }
@@ -143,34 +130,40 @@ public class SunLight : MonoBehaviour
             Debug.LogWarning("힐링 이펙트 이름이 설정되지 않았습니다.");
         }
     }
-    
-    // 일정 시간 후 이펙트 비활성화 (정적 메서드로 변경)
+
     private static IEnumerator DeactivateEffectAfterDelay(GameObject effectObject, float delay)
     {
-        Debug.Log($"이펙트 타이머 시작: {delay}초 후 종료 예정");
-        
         yield return new WaitForSeconds(delay);
-        
+
         if (effectObject != null)
         {
-            // 파티클 시스템이 있다면 완전히 정지
             ParticleSystem particles = effectObject.GetComponent<ParticleSystem>();
             if (particles != null)
             {
-                particles.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear); // 방출 정지 + 기존 파티클 제거
-                Debug.Log("파티클 시스템 정지 완료");
-                
-                // 파티클이 완전히 사라질 때까지 대기
+                particles.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
                 yield return new WaitForSeconds(0.5f);
             }
-            
-            // 이펙트 오브젝트 비활성화
+
             effectObject.SetActive(false);
-            Debug.Log("햇빛 힐링 이펙트 종료 - " + effectObject.name + " 비활성화됨");
         }
-        else
+    }
+
+    // 임시 오디오 오브젝트를 사용해 사운드 재생
+    private void PlayOneShot(Vector3 soundPosition)
+    {
+        if (collectionSound != null)
         {
-            Debug.LogWarning("이펙트 오브젝트가 null입니다. 이미 파괴되었을 수 있습니다.");
+            GameObject tempAudio = new GameObject("TempSunAudio");
+            tempAudio.transform.position = soundPosition;
+
+            AudioSource tempSource = tempAudio.AddComponent<AudioSource>();
+            tempSource.clip = collectionSound;
+            tempSource.spatialBlend = 0f; // 2D 사운드
+            tempSource.Play();
+
+            Destroy(tempAudio, collectionSound.length);
+
+            Debug.Log("햇빛 획득 사운드 재생됨: " + collectionSound.name);
         }
     }
 }
