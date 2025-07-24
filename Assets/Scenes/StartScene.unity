@@ -340,12 +340,12 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 1693480564}
         m_TargetAssemblyTypeName: SceneTransitionManager, Assembly-CSharp
-        m_MethodName: FadeOutAndChangeScene
+        m_MethodName: ChangeScene
         m_Mode: 3
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
+          m_IntArgument: 1
           m_FloatArgument: 0
           m_StringArgument: 
           m_BoolArgument: 0
@@ -944,7 +944,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 1693480564}
         m_TargetAssemblyTypeName: SceneTransitionManager, Assembly-CSharp
-        m_MethodName: FadeOutAndChangeScene
+        m_MethodName: ChangeScene
         m_Mode: 3
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -1236,9 +1236,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 03e86ac0ac7846d41949c5767444b576, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  fadeImage: {fileID: 2103944929}
-  fadeOutDuration: 1
-  fadeInDuration: 1
 --- !u!1 &1938426125
 GameObject:
   m_ObjectHideFlags: 0
@@ -1388,7 +1385,7 @@ GameObject:
   - component: {fileID: 2103944929}
   m_Layer: 5
   m_Name: FadeIn
-  m_TagString: Untagged
+  m_TagString: FadeImage
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0

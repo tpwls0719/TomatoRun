@@ -10,6 +10,7 @@ TagManager:
   - Water
   - Pill
   - Sunlight
+  - FadeImage
   layers:
   - Default
   - TransparentFX
