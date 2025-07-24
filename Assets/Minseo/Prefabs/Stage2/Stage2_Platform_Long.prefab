@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 874180851996721}
   - component: {fileID: 199628445744781816}
   - component: {fileID: 1976245735890644170}
-  - component: {fileID: 2270472254570806765}
+  - component: {fileID: 3033360791619191199}
   - component: {fileID: 2145028507431944542}
   m_Layer: 0
   m_Name: Stage2_Platform_Long
@@ -139,7 +139,7 @@ BoxCollider2D:
   m_AutoTiling: 0
   m_Size: {x: 13.04, y: 6.5}
   m_EdgeRadius: 0
---- !u!114 &2270472254570806765
+--- !u!114 &3033360791619191199
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -151,7 +151,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: aa497b810958a9847b5a75f7d6f5ab93, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  speed: 0
+  speed: 6
 --- !u!114 &2145028507431944542
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -168,7 +168,7 @@ MonoBehaviour:
   - {fileID: 5338301674650491885}
   - {fileID: 924809424980634918}
   - {fileID: 7380913956979383127}
-  speed: 6
+  speed: 0
 --- !u!1001 &2224914219800031745
 PrefabInstance:
   m_ObjectHideFlags: 0

@@ -4,7 +4,6 @@ public class Platform : MonoBehaviour
 {
     public GameObject[] obstacles; // 장애물 컴포넌트
     private bool stepped = false; // 플레이어 캐릭터가 밟았었는가
-    public float speed = 10f; // 플랫폼 이동 속도 (빠르게 수정)
     private float leftBorder; // 화면 왼쪽 경계
 
     // 컴포넌트가 활성활될 때마다 매번 실행되는 메서드
@@ -37,21 +36,19 @@ public class Platform : MonoBehaviour
 
     void OnCollisionEnter2D(Collision2D collision)
     {
-        // 충돌한 상대방의 태그가 Plaer && 이전에 플레이어가 밟지 않았다면
-        if (collision.collider.tag=="Player" && !stepped)
+        // 충돌한 상대방의 태그가 Player && 이전에 플레이어가 밟지 않았다면
+        if (collision.collider.tag == "Player" && !stepped)
         {
             // 플레이어가 밟았음을 기록
             stepped = true;
-
         }
     }
     
     // Update is called once per frame
     void Update()
     {
-        // 왼쪽으로 일정 속도로 이동
-        transform.Translate(Vector2.left * speed * Time.deltaTime);
-        
+        // 이동 속도 관련 코드 삭제됨
+
         // 플랫폼의 너비 구하기
         float platformWidth = 0f;
         if (GetComponent<Renderer>() != null)

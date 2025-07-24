@@ -22,13 +22,26 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    private void Start()
+    {
+        if (AudioManager.Instance != null)
+        {
+            AudioManager.Instance.PlayBGM();
+            Debug.Log("GameManager: BGM 재생 시작");
+        }
+        else
+        {
+            Debug.LogWarning("GameManager: AudioManager 인스턴스를 찾을 수 없습니다!");
+        }
+    }
+
     // 게임 재시작 (씬 재로드)
     public void Restart()
     {
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
 
-    public void SetGlobalScrollSpeed(float multiplier)
+    /*public void SetGlobalScrollSpeed(float multiplier)
     {
         ScrollingObject[] scrolls = FindObjectsOfType<ScrollingObject>();
         foreach (var scroll in scrolls)
@@ -54,7 +67,7 @@ public class GameManager : MonoBehaviour
         {
             spawner.ResetSpawnSpeed();
         }
-    }
+    }*/
 
     public void RestartGame()
     {

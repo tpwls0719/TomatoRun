@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 492566557634466833}
   - component: {fileID: 8382696559732363937}
   - component: {fileID: 2870289708800766783}
-  - component: {fileID: 79999772053701702}
+  - component: {fileID: 6365891751445969376}
   - component: {fileID: 7353753067637399041}
   m_Layer: 0
   m_Name: Stage3_Platform_Long
@@ -110,7 +110,7 @@ MonoBehaviour:
   - {fileID: 6452202398432540189}
   - {fileID: 5598349767077128397}
   speed: 0
---- !u!114 &79999772053701702
+--- !u!114 &6365891751445969376
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}

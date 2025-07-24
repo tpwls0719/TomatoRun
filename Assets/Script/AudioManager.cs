@@ -44,7 +44,7 @@ public class AudioManager : MonoBehaviour
     // ------------------
     public void PlayBGM()
     {
-        if (bgmClip == null) return;
+        if (bgmClip == null || (bgmSource.clip == bgmClip && bgmSource.isPlaying)) return;
 
         bgmSource.clip = bgmClip;
         bgmSource.Play();
@@ -60,11 +60,17 @@ public class AudioManager : MonoBehaviour
     // ------------------
     public void PlayGameOver()
     {
-        sfxSource.PlayOneShot(gameOverClip);
+        if (gameOverClip != null && !sfxSource.isPlaying)
+        {
+            sfxSource.PlayOneShot(gameOverClip);
+        }
     }
 
     public void PlayGameClear()
     {
-        sfxSource.PlayOneShot(gameClearClip);
+        if (gameClearClip != null && !sfxSource.isPlaying)
+        {
+            sfxSource.PlayOneShot(gameClearClip);
+        }
     }
 }

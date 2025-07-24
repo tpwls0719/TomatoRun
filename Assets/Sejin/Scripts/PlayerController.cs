@@ -4,6 +4,7 @@ using System.Collections;
 public class PlayerController : MonoBehaviour
 {
     public AudioClip deathClip;
+    public AudioClip hitClip;
     public float jumpForce = 500f;
 
     private int jumpCount = 0;
@@ -28,7 +29,7 @@ public class PlayerController : MonoBehaviour
     private bool isInvincible = false;
     private float invincibleEndTime = 0f;
     public float invincibleDuration = 3f;
-    
+
     // [추가] 크기 변경 관련 변수
     private Vector3 originalScale;
     private bool isScaled = false;
@@ -43,33 +44,33 @@ public class PlayerController : MonoBehaviour
 
         currentHealth = maxHealth;
         boostedSpeed = originalSpeed;
-        
+
         // 원래 크기 저장
         originalScale = transform.localScale;
     }
-    
+
     // 플레이어 상태를 초기화하는 메서드 (GameManager에서 호출)
     public void ResetPlayerState()
     {
         Debug.Log("플레이어 상태 초기화 작업 시작");
-        
+
         // 기본 상태 초기화
         jumpCount = 0;
         isGrounded = false;
         isDead = false;
         currentHealth = maxHealth;
-        
+
         // 크기 초기화
         isScaled = false;
         transform.localScale = originalScale;
-        
+
         // 물리 상태 초기화
         if (playerRigidbody != null)
         {
             playerRigidbody.linearVelocity = Vector2.zero;
             playerRigidbody.angularVelocity = 0f;
         }
-        
+
         // 애니메이션 상태 초기화
         if (animator != null)
         {
@@ -77,7 +78,7 @@ public class PlayerController : MonoBehaviour
             // 사망 상태에서 일반 상태로 복귀 (필요한 경우)
             animator.ResetTrigger("Die");
         }
-        
+
         Debug.Log("플레이어 상태 초기화 완료 - 체력: " + currentHealth + "/" + maxHealth);
     }
 
@@ -95,7 +96,7 @@ public class PlayerController : MonoBehaviour
             //리지드바디에 위쪽으로 힘을 주기
             playerRigidbody.AddForce(new Vector2(0, jumpForce));
             //오디오 소스 재생
-//            playerAudio.Play();
+            //            playerAudio.Play();
         }
         animator.SetBool("Grounded", isGrounded);
 
@@ -115,7 +116,7 @@ public class PlayerController : MonoBehaviour
             spriteRenderer.enabled = true;
             Debug.Log("무적 상태 해제");
         }
-        
+
         // 크기 변경 시간 종료 체크
         if (isScaled && Time.time >= scaleEndTime)
         {
@@ -126,7 +127,7 @@ public class PlayerController : MonoBehaviour
 
         Move();
 
-        
+
     }
 
     // 좌우 이동
@@ -139,7 +140,7 @@ public class PlayerController : MonoBehaviour
 
     private void Die()
     {
-         //애니메이터의 Die 트리거 파라미터를 셋
+        //애니메이터의 Die 트리거 파라미터를 셋
         animator.SetTrigger("Die");
 
         //오디오 소스에 할당된 오디오 클립을 deathClip으로 변경
@@ -158,36 +159,47 @@ public class PlayerController : MonoBehaviour
     }
 
     private void TakeDamage(int damage)
-{
-    Debug.Log("TakeDamage 메서드 호출 - 데미지: " + damage);
-
-    InvincibilityItem invincibilityController = GetComponent<InvincibilityItem>();
-    if (invincibilityController != null && invincibilityController.IsInvincible)
     {
-        Debug.Log("무적 상태로 인해 데미지를 받지 않습니다!");
-        return;
-    }
+        Debug.Log("TakeDamage 메서드 호출 - 데미지: " + damage);
 
-    currentHealth -= damage;
+        InvincibilityItem invincibilityController = GetComponent<InvincibilityItem>();
+        if (invincibilityController != null && invincibilityController.IsInvincible)
+        {
+            Debug.Log("무적 상태로 인해 데미지를 받지 않습니다!");
+            return;
+        }
 
-    // UIManager에 현재 체력 상태를 전달
-    if (UIManager.Instance != null)
-    {
-        UIManager.Instance.UpdateHeartDisplay(currentHealth);
-    }
+        currentHealth -= damage;
 
-    if (currentHealth <= 0 && !isDead)
-    {
-        Die();
+        // UIManager에 현재 체력 상태를 전달
+        if (UIManager.Instance != null)
+        {
+            UIManager.Instance.UpdateHeartDisplay(currentHealth);
+        }
+
+        if (currentHealth > 0)
+        {
+            // 생존한 경우 피격 깜빡임 효과 시작
+            StartCoroutine(FlashOnHit());
+            // 피격 사운드 재생
+            if (hitClip != null && playerAudio != null)
+            {
+                //playerAudio.PlayOneShot(hitClip);
+            }
+        }
+
+        if (currentHealth <= 0 && !isDead)
+        {
+            Die();
+        }
     }
-}
 
 
 
     private void OnTriggerEnter2D(Collider2D other)
     {
         Debug.Log("OnTriggerEnter2D 호출 - 충돌 오브젝트: " + other.name + ", 태그: " + other.tag);
-        
+
         if (other.tag == "Dead" && !isDead)
         {
             Debug.Log("죽음");
@@ -210,7 +222,7 @@ public class PlayerController : MonoBehaviour
             if (isScaled && !isGrounded)
             {
                 Debug.Log("커진 상태에서 착지!");
-                
+
                 // InvincibilityItem에 착지 이벤트 알림
                 InvincibilityItem invincibilityItem = GetComponent<InvincibilityItem>();
                 if (invincibilityItem != null)
@@ -219,7 +231,7 @@ public class PlayerController : MonoBehaviour
                     invincibilityItem.SendMessage("OnPlayerLandedWhileScaled", SendMessageOptions.DontRequireReceiver);
                 }
             }
-            
+
             // isGrounded를 true로 변경하고, 누적 점프 횟수를 0으로 리셋
             isGrounded = true;
             jumpCount = 0;
@@ -229,26 +241,27 @@ public class PlayerController : MonoBehaviour
     private void OnCollisionExit2D(Collision2D collision)
     {
         // 어떤 콜라이더에서 떼어진 경우 isGrounded를 false로 변경
-        isGrounded = false; 
+        isGrounded = false;
     }
 
-    
+
     // 햇빛 아이템 효과
     public void ExtendMaxHealth(int amount)
     {
         maxHealth += amount;
         currentHealth += amount;
         Debug.Log("햇빛으로 체력 확장! 현재 최대 체력: " + maxHealth);
+        //UIManager.Instance.UpdateHeartDisplay(currentHealth);
     }
 
     // 속도 부스트
-    public void ActivateSpeedBoost(float multiplier, float duration)
+    /*public void ActivateSpeedBoost(float multiplier, float duration)
     {
         boostedSpeed = originalSpeed * multiplier;
         isSpeedBoosted = true;
         speedBoostEndTime = Time.time + duration;
         Debug.Log("속도 증가! 지속시간: " + duration + "초");
-    }
+    }*/
 
     // 무적 모드 활성화 메서드
     public void SetInvincible(float duration)
@@ -258,7 +271,7 @@ public class PlayerController : MonoBehaviour
         StartCoroutine(BlinkEffect());
         Debug.Log("무적 상태 시작! " + duration + "초간");
     }
-    
+
     // 플레이어 크기 변경 메서드
     public void SetPlayerScale(float scaleMultiplier, float duration)
     {
@@ -277,5 +290,21 @@ public class PlayerController : MonoBehaviour
         }
 
         spriteRenderer.enabled = true;
+    }
+    
+    IEnumerator FlashOnHit()
+    {
+        float flashDuration = 0.4f;           // 총 지속 시간
+        float flashInterval = 0.07f;          // 깜빡이는 간격
+        float elapsedTime = 0f;
+
+        while (elapsedTime < flashDuration)
+        {
+            spriteRenderer.enabled = !spriteRenderer.enabled;
+            yield return new WaitForSeconds(flashInterval);
+            elapsedTime += flashInterval;
+        }
+
+        spriteRenderer.enabled = true; // 원래대로
     }
 }

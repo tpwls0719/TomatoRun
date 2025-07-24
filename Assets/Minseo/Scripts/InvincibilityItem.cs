@@ -101,11 +101,11 @@ public class InvincibilityItem : MonoBehaviour
         ActivatePillEffect();
 
         // ✅ 속도 증가
-        if (GameManager.Instance != null)
+        /*if (GameManager.Instance != null)
         {
             GameManager.Instance.SetGlobalScrollSpeed(speedBoostMultiplier);
             Debug.Log("스크롤 속도 증가");
-        }
+        }*/
 
         // ✅ 플레이어 크기 변화
         if (enableScaleChange)
@@ -127,11 +127,11 @@ public class InvincibilityItem : MonoBehaviour
         DeactivateInvincibilityText();
 
         // ✅ 속도 원복
-        if (GameManager.Instance != null)
+       /* if (GameManager.Instance != null)
         {
             GameManager.Instance.ResetGlobalScrollSpeed();
             Debug.Log("스크롤 속도 원복");
-        }
+        }*/
 
         // ✅ 플레이어 크기 원복
         if (enableScaleChange)
@@ -469,8 +469,8 @@ public class InvincibilityItem : MonoBehaviour
         DeactivateInvincibilityText();
         DeactivatePillEffect();
 
-        if (GameManager.Instance != null)
-            GameManager.Instance.ResetGlobalScrollSpeed();
+        /*if (GameManager.Instance != null)
+            GameManager.Instance.ResetGlobalScrollSpeed();*/
             
         // 플레이어 크기 초기화
         if (enableScaleChange)
