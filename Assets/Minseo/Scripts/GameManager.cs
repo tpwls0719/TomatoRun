@@ -15,19 +15,20 @@ public class GameManager : MonoBehaviour
 
     private void Awake()
     {
-        // 싱글톤 패턴 구현
         if (Instance == null)
-        {
-            Instance = this;
-            DontDestroyOnLoad(gameObject);
-            audioSource = GetComponent<AudioSource>();
-            if (audioSource == null)
-                audioSource = gameObject.AddComponent<AudioSource>();
-        }
-        else
-        {
-            Destroy(gameObject);
-        }
+    {
+        Instance = this;
+        DontDestroyOnLoad(gameObject);
+        audioSource = GetComponent<AudioSource>();
+        if (audioSource == null)
+            audioSource = gameObject.AddComponent<AudioSource>();
+        gameObject.AddComponent<AudioSource>();
+    }
+    else if (Instance != this)
+    {
+        Destroy(gameObject);
+        return;
+    }
     }
 
     private void Start()
@@ -141,18 +142,11 @@ public class GameManager : MonoBehaviour
         GameObject player = GameObject.FindGameObjectWithTag("Player");
         if (player != null)
         {
-            // 플레이어를 시작 위치로 이동 (필요에 따라 좌표 조정)
-            player.transform.position = new Vector3(0, 0, 0);
-
-            // 플레이어의 속도 초기화
-            Rigidbody2D playerRb = player.GetComponent<Rigidbody2D>();
-            if (playerRb != null)
+            PlayerController controller = player.GetComponent<PlayerController>();
+            if (controller != null)
             {
-                playerRb.linearVelocity = Vector2.zero;
-                playerRb.angularVelocity = 0f;
+                controller.ResetPlayerPosition();
             }
-
-            Debug.Log("플레이어 위치 초기화");
         }
     }
 
@@ -234,7 +228,7 @@ public class GameManager : MonoBehaviour
             }
         }
 
-        GameObject[] activeWaterDrops = GameObject.FindGameObjectsWithTag("WaterDrop");
+        GameObject[] activeWaterDrops = GameObject.FindGameObjectsWithTag("Water");
         for (int i = 0; i < activeWaterDrops.Length; i++)
         {
             if (activeWaterDrops[i].activeSelf)
@@ -243,7 +237,7 @@ public class GameManager : MonoBehaviour
             }
         }
 
-        GameObject[] activeSunLights = GameObject.FindGameObjectsWithTag("SunLight");
+        GameObject[] activeSunLights = GameObject.FindGameObjectsWithTag("Sunlight");
         for (int i = 0; i < activeSunLights.Length; i++)
         {
             if (activeSunLights[i].activeSelf)
@@ -328,6 +322,38 @@ public class GameManager : MonoBehaviour
         mainCamera.transform.localPosition = originalPosition;
         Debug.Log($"카메라 쉐이크 완료 - 지속시간: {duration}초, 강도: {intensity}");
     }
-    
-    
+    private void OnEnable()
+    {
+        SceneManager.sceneLoaded += OnSceneLoaded;
+    }
+
+    private void OnDisable()
+    {
+        SceneManager.sceneLoaded -= OnSceneLoaded;
+    }
+
+    private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        if (scene.name == "Main") // 또는 scene.buildIndex == 메인 씬 인덱스
+        {
+            StartCoroutine(InitializeMainScene());
+        }
+    }
+
+    private System.Collections.IEnumerator InitializeMainScene()
+    {
+        yield return null; // 한 프레임 기다려서 씬이 완전히 로드되도록
+
+        Debug.Log("메인 씬 로드됨 - 자동 초기화 시작");
+
+        isGameOver = false;
+        isGameCleared = false;
+        Time.timeScale = 1f;
+
+        ResetPlayerPosition();
+        ResetPlayerState();
+        ResetGameTime();
+        ResetGameObjects();
+    }
+
 }

@@ -3,6 +3,10 @@ using System.Collections;
 
 public class PlayerController : MonoBehaviour
 {
+
+    private Vector3 initialPosition;
+    private Quaternion initialRotation;
+
     public AudioClip deathClip;
     public AudioClip hitClip;
     public float jumpForce = 500f;
@@ -47,6 +51,9 @@ public class PlayerController : MonoBehaviour
 
         // 원래 크기 저장
         originalScale = transform.localScale;
+
+        initialPosition = transform.position;
+        initialRotation = transform.rotation;
     }
 
     // 플레이어 상태를 초기화하는 메서드 (GameManager에서 호출)
@@ -322,5 +329,19 @@ public class PlayerController : MonoBehaviour
         }
 
         spriteRenderer.enabled = true; // 원래대로
+    }
+
+    public void ResetPlayerPosition()
+    {
+        transform.position = initialPosition;
+        transform.rotation = initialRotation;
+
+        if (playerRigidbody != null)
+        {
+            playerRigidbody.linearVelocity = Vector2.zero;
+            playerRigidbody.angularVelocity = 0f;
+        }
+
+        Debug.Log("플레이어 위치와 회전 초기화 완료");
     }
 }
