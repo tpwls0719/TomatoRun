@@ -30,11 +30,9 @@ public class ItemSpawner : MonoBehaviour
     [Header("플랫폼 카운트")]
     public int platformsPerStage = 10;
 
-    /* ───── 시간 기반 햇빛 타이밍 ───── */
-    [Header("고정 햇빛 타이밍(초)")]
-    // 35, 35+37.5, … — Start()에서 계산
-    readonly List<float> sunlightTimes = new();
-    int nextSunIdx = 0; // 다음 햇빛 타이밍 인덱스
+    /* ───── 고정 햇빛 타이밍 (초) - 인스펙터에서 조절 가능 ───── */
+    [Header("고정 햇빛 스폰 타이밍 (초) - 직접 설정 가능")]
+    public List<float> sunlightSpawnTimings = new List<float>() { 30f, 67.5f, 105f, 142.5f };
 
     /* ───── 기타 ───── */
     [Header("레이어 마스크")]
@@ -52,6 +50,8 @@ public class ItemSpawner : MonoBehaviour
 
     int waterCursor, pillCursor, sunCursor;
 
+    int nextSunIdx = 0; // 다음 햇빛 타이밍 인덱스
+
     /* ───────────────────────────────────────────────────────────── */
 
     void Awake()
@@ -67,10 +67,7 @@ public class ItemSpawner : MonoBehaviour
     void Start()
     {
         InitPools();
-
-        // 햇빛 스폰 시각 계산: 35, 72.5, 110, 147.5
-        for (int i = 0; i < 4; i++)
-            sunlightTimes.Add(30f + 37.5f * i);
+        // 더 이상 Start()에서 햇빛 타이밍 계산 불필요, 인스펙터에서 설정
     }
 
     /* ─── 풀 초기화 ─── */
@@ -297,61 +294,57 @@ public class ItemSpawner : MonoBehaviour
 
     void SpawnSun(Vector2 loc, GameObject plat)
     {
-        var o = Pull(ref sunlightPool, ref sunCursor, sunlightPrefab, 2);
+        var o = Pull(ref sunlightPool, ref sunCursor, sunlightPrefab, 1);
         if (!o) return;
 
         o.transform.SetParent(plat.transform, false);
         o.transform.localPosition = loc;
         o.SetActive(true);
 
-        nextSunIdx++; // 다음 예약 타이밍으로
+        nextSunIdx++;  // 다음 햇빛 타이밍으로 이동
     }
 
-    /* ─── 햇빛 스폰 가능? ─── */
+    /* ─── 햇빛 스폰 가능 여부 ─── */
     bool CanSpawnSunlight()
     {
-        if (nextSunIdx >= sunlightTimes.Count) return false; // 예약 끝
+        if (nextSunIdx >= sunlightSpawnTimings.Count) return false;
+
         var ui = FindFirstObjectByType<UIManager>();
         if (ui == null) return false;
 
-        return ui.GameTime >= sunlightTimes[nextSunIdx];
+        return ui.GameTime >= sunlightSpawnTimings[nextSunIdx];
     }
 
-    /* ─── 유틸 ─── */
-    int RandExcept(int size, int ex)
+    /* ─── 다음 인덱스 중 하나 무작위로 뽑기 (sunlight, pill 위치 겹치지 않게) ─── */
+    int RandExcept(int max, int except)
     {
-        if (size <= 1) return 0;
-        int i;
-        do { i = Random.Range(0, size); } while (i == ex);
-        return i;
+        if (max <= 1) return 0;
+        if (except < 0 || except >= max) return Random.Range(0, max);
+
+        int r = Random.Range(0, max - 1);
+        if (r >= except) r++;
+        return r;
     }
 
-    /* ─── 재시작 ─── */
+    /* ─── 게임 재시작 시 초기화 ─── */
     public void RestartGame()
     {
         currentStage = 1;
         platformCountThisStage = 0;
-        pillSpawnedThisStage   = 0;
+        pillSpawnedThisStage = 0;
+        nextSunIdx = 0;
 
-        waterCursor = pillCursor = sunCursor = 0;
-        nextSunIdx  = 0;
-
-        ResetPool(waterDropPool);
-        ResetPool(pillPool);
-        ResetPool(sunlightPool);
+        // 모든 아이템 비활성화
+        DeactivateAll(waterDropPool);
+        DeactivateAll(pillPool);
+        DeactivateAll(sunlightPool);
     }
 
-    void ResetPool(GameObject[] pool)
+    void DeactivateAll(GameObject[] pool)
     {
         if (pool == null) return;
         foreach (var o in pool)
-        {
             if (o != null)
-            {
-                o.transform.SetParent(null);
-                o.transform.position = Vector3.one * 9999;
                 o.SetActive(false);
-            }
-        }
     }
 }

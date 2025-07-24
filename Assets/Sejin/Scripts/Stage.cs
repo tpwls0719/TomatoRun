@@ -7,7 +7,7 @@ public class Stage : MonoBehaviour
     public GameObject[] Stages;
 
     private float timer = 0f;
-    private float stageDuration = 35f;
+    public float stageDuration = 34f;
     private int totalPoint = 0;
 
     public PlatformSpawner platformSpawner; // 에디터에서 할당하거나 자동 연결

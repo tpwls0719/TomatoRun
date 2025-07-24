@@ -185,12 +185,22 @@ public class UIManager : MonoBehaviour
     // 햇빛(생명) 아이템 획득 처리
     public void CollectSunlight()
     {
-        // 최대 생명 수를 초과하지 않도록 생명 추가
         if (currentHearts < maxHearts)
         {
             currentHearts++;
             UpdateHeartDisplay();
             Debug.Log($"햇빛 획득! 하트 +1 (현재 하트: {currentHearts}/{maxHearts})");
+
+            // ✅ 플레이어 체력도 같이 회복
+            GameObject player = GameObject.FindGameObjectWithTag("Player");
+            if (player != null)
+            {
+                PlayerController pc = player.GetComponent<PlayerController>();
+                if (pc != null)
+                {
+                    pc.Heal(1);
+                }
+            }
         }
         else
         {

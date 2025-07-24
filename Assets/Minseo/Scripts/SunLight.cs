@@ -33,34 +33,45 @@ public class SunLight : MonoBehaviour
     private void OnTriggerEnter2D(Collider2D other)
     {
         if (other.CompareTag("Player"))
+    {
+        if (!gameObject.activeSelf)
+            return;
+
+        Debug.Log("햇빛 아이템 획득: " + gameObject.name);
+
+        // ⭐ 플레이어 체력 회복
+        PlayerController playerController = other.GetComponent<PlayerController>();
+        if (playerController != null)
         {
-            // 이미 처리된 아이템인지 확인 (중복 방지)
-            if (!gameObject.activeSelf)
-                return;
-                
-            Debug.Log("햇빛 아이템 획득: " + gameObject.name);
-            
-            // 플레이어에서 힐링 이펙트 재생
-            if (!string.IsNullOrEmpty(healEffectName))
-            {
-                PlayHealEffect(other.gameObject);
-            }
-            
-            // 사운드 재생
-            if (audioSource != null && collectionSound != null)
-            {
-                audioSource.PlayOneShot(collectionSound);
-            }
-            
-            // UIManager를 통해 생명력(하트) 1 회복
-            if (UIManager.Instance != null)
-            {
-                UIManager.Instance.CollectSunlight();
-            }
-            
-            // 햇빛 아이템 비활성화 (풀링)
-            gameObject.SetActive(false);
+            Debug.Log("Heal() 호출 직전 currentHealth: " + playerController.currentHealth);
+            playerController.Heal(1);
         }
+        else
+        {
+            Debug.LogWarning("PlayerController 찾기 실패");
+        }
+
+        // 이펙트
+        if (!string.IsNullOrEmpty(healEffectName))
+        {
+            PlayHealEffect(other.gameObject);
+        }
+
+        // 사운드
+        if (audioSource != null && collectionSound != null)
+        {
+            audioSource.PlayOneShot(collectionSound);
+        }
+
+        // UI 하트 반영 (optional)
+        if (UIManager.Instance != null)
+        {
+            UIManager.Instance.CollectSunlight(); // UI 하트 증가 처리
+        }
+
+        // 비활성화 (풀링)
+        gameObject.SetActive(false);
+    }
     }
     
     // 플레이어에서 힐링 이펙트 재생

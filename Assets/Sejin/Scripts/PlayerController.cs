@@ -17,7 +17,7 @@ public class PlayerController : MonoBehaviour
     private SpriteRenderer spriteRenderer;
 
     public int maxHealth = 3;
-    private int currentHealth;
+    public int currentHealth;
 
     // [추가] 속도 관련 변수
     private float originalSpeed = 5f;
@@ -246,13 +246,13 @@ public class PlayerController : MonoBehaviour
 
 
     // 햇빛 아이템 효과
-    public void ExtendMaxHealth(int amount)
+    /*public void ExtendMaxHealth(int amount)
     {
         maxHealth += amount;
         currentHealth += amount;
         Debug.Log("햇빛으로 체력 확장! 현재 최대 체력: " + maxHealth);
         //UIManager.Instance.UpdateHeartDisplay(currentHealth);
-    }
+    }*/
 
     // 속도 부스트
     /*public void ActivateSpeedBoost(float multiplier, float duration)
@@ -262,6 +262,22 @@ public class PlayerController : MonoBehaviour
         speedBoostEndTime = Time.time + duration;
         Debug.Log("속도 증가! 지속시간: " + duration + "초");
     }*/
+
+    public void Heal(int amount)
+    {
+        int prev = currentHealth;
+        currentHealth = Mathf.Min(currentHealth + amount, maxHealth);
+
+        if (currentHealth > prev)
+        {
+            Debug.Log($"체력 회복! {prev} → {currentHealth}");
+            UIManager.Instance?.UpdateHeartDisplay(currentHealth);
+        }
+        else
+        {
+            Debug.Log("체력이 이미 최대치입니다!");
+        }
+    }
 
     // 무적 모드 활성화 메서드
     public void SetInvincible(float duration)
