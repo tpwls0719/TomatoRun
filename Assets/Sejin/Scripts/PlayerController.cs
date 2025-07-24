@@ -34,7 +34,7 @@ public class PlayerController : MonoBehaviour
         playerRigidbody = GetComponent<Rigidbody2D>();
         animator = GetComponent<Animator>();
         spriteRenderer = GetComponent<SpriteRenderer>();
-        //playerAudio = GetComponent<AudioSource>();
+        playerAudio = GetComponent<AudioSource>();
 
         currentHealth = maxHealth;
         boostedSpeed = originalSpeed;
@@ -123,9 +123,9 @@ public class PlayerController : MonoBehaviour
         animator.SetTrigger("Die");
 
         //오디오 소스에 할당된 오디오 클립을 deathClip으로 변경
-        //playerAudio.clip = deathClip;
+        playerAudio.clip = deathClip;
         //사망 효과음 재생
-        //playerAudio.Play();
+        playerAudio.Play();
 
         // 속도를 제로(0, 0)로 변경
         playerRigidbody.linearVelocity = Vector2.zero;

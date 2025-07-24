@@ -149,4 +149,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   healEffectName: Charge
   effectDuration: 1
-  collectionSound: {fileID: 0}
+  collectionSound: {fileID: 8300000, guid: b0e62ed71b1538648b719821f4f63b4c, type: 3}

@@ -150,4 +150,4 @@ MonoBehaviour:
   scoreValue: 100
   collectionEffect: {fileID: 8400950401932465450, guid: 3124b314512184c4cba614f71dfd5346, type: 3}
   effectDuration: 1
-  collectionSound: {fileID: 0}
+  collectionSound: {fileID: 8300000, guid: 7cc057bed53baf34799f52aab3c84800, type: 3}
