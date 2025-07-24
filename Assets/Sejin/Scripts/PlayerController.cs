@@ -28,6 +28,11 @@ public class PlayerController : MonoBehaviour
     private bool isInvincible = false;
     private float invincibleEndTime = 0f;
     public float invincibleDuration = 3f;
+    
+    // [추가] 크기 변경 관련 변수
+    private Vector3 originalScale;
+    private bool isScaled = false;
+    private float scaleEndTime = 0f;
 
     void Start()
     {
@@ -38,6 +43,9 @@ public class PlayerController : MonoBehaviour
 
         currentHealth = maxHealth;
         boostedSpeed = originalSpeed;
+        
+        // 원래 크기 저장
+        originalScale = transform.localScale;
     }
     
     // 플레이어 상태를 초기화하는 메서드 (GameManager에서 호출)
@@ -50,6 +58,10 @@ public class PlayerController : MonoBehaviour
         isGrounded = false;
         isDead = false;
         currentHealth = maxHealth;
+        
+        // 크기 초기화
+        isScaled = false;
+        transform.localScale = originalScale;
         
         // 물리 상태 초기화
         if (playerRigidbody != null)
@@ -83,7 +95,7 @@ public class PlayerController : MonoBehaviour
             //리지드바디에 위쪽으로 힘을 주기
             playerRigidbody.AddForce(new Vector2(0, jumpForce));
             //오디오 소스 재생
-            playerAudio.Play();
+//            playerAudio.Play();
         }
         animator.SetBool("Grounded", isGrounded);
 
@@ -102,6 +114,14 @@ public class PlayerController : MonoBehaviour
             StopCoroutine("BlinkEffect");
             spriteRenderer.enabled = true;
             Debug.Log("무적 상태 해제");
+        }
+        
+        // 크기 변경 시간 종료 체크
+        if (isScaled && Time.time >= scaleEndTime)
+        {
+            isScaled = false;
+            transform.localScale = originalScale;
+            Debug.Log("플레이어 크기 원래대로 복구");
         }
 
         Move();
@@ -186,6 +206,20 @@ public class PlayerController : MonoBehaviour
         // 어떤 콜라이더와 닿았으며, 충돌 표면이 위쪽을 보고 있으면
         if (collision.contacts[0].normal.y > 0.7f)
         {
+            // 착지 로그 (카메라 쉐이크는 InvincibilityItem에서 처리)
+            if (isScaled && !isGrounded)
+            {
+                Debug.Log("커진 상태에서 착지!");
+                
+                // InvincibilityItem에 착지 이벤트 알림
+                InvincibilityItem invincibilityItem = GetComponent<InvincibilityItem>();
+                if (invincibilityItem != null)
+                {
+                    // Unity가 메서드를 인식하지 못하는 경우를 대비한 대안
+                    invincibilityItem.SendMessage("OnPlayerLandedWhileScaled", SendMessageOptions.DontRequireReceiver);
+                }
+            }
+            
             // isGrounded를 true로 변경하고, 누적 점프 횟수를 0으로 리셋
             isGrounded = true;
             jumpCount = 0;
@@ -224,7 +258,15 @@ public class PlayerController : MonoBehaviour
         StartCoroutine(BlinkEffect());
         Debug.Log("무적 상태 시작! " + duration + "초간");
     }
-
+    
+    // 플레이어 크기 변경 메서드
+    public void SetPlayerScale(float scaleMultiplier, float duration)
+    {
+        isScaled = true;
+        scaleEndTime = Time.time + duration;
+        transform.localScale = originalScale * scaleMultiplier;
+        Debug.Log($"플레이어 크기 {scaleMultiplier}배로 변경! 지속시간: {duration}초");
+    }
     // 반짝임 효과 코루틴
     IEnumerator BlinkEffect()
     {

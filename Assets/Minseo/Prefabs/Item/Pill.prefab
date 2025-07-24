@@ -149,13 +149,16 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   invincibilityDuration: 5
+  speedBoostMultiplier: 1.5
+  enableScaleChange: 1
+  scaleMultiplier: 1.5
+  enableCameraShake: 1
+  shakeIntensity: 0.2
+  shakeDuration: 0.04
   invincibilityStartSound: {fileID: 0}
   invincibilityEndSound: {fileID: 0}
   invincibilityTextName: InvincibilityText
   pillEffectName: PillEffect_01
-  obstacleKnockbackForce: 10
-  obstacleRotationForce: 300
-  obstacleDestroyDelay: 2
 --- !u!114 &5312813083202260917
 MonoBehaviour:
   m_ObjectHideFlags: 0

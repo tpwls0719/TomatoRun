@@ -179,16 +179,7 @@ public class UIManager : MonoBehaviour
             Debug.LogWarning("ItemSpawner.Instance가 null입니다!");
         }
         
-        if (invincibilityController != null)
-        {
-            // 이 메서드는 InvincibilityItem 스크립트에서  
-            // 무적 상태 시작을 담당하는 함수라고 가정
-            invincibilityController.ActivateInvincibility();  
-        }
-        else
-        {
-            Debug.LogWarning("InvincibilityItem 컨트롤러가 연결되지 않았습니다!");
-        }
+        Debug.Log("알약 수집 처리 완료 - 무적 활성화는 InvincibilityItem에서 처리됨");
     }
     
     // 햇빛(생명) 아이템 획득 처리
