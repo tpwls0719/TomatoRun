@@ -274,5 +274,34 @@ public class GameManager : MonoBehaviour
         return !isGameOver && !isGameCleared;
     }
     
+    // 카메라 쉐이크 메서드
+    public void ShakeCamera(float duration, float intensity)
+    {
+        StartCoroutine(ShakeCameraCoroutine(duration, intensity));
+    }
+    
+    private System.Collections.IEnumerator ShakeCameraCoroutine(float duration, float intensity)
+    {
+        Camera mainCamera = Camera.main;
+        if (mainCamera == null) yield break;
+        
+        Vector3 originalPosition = mainCamera.transform.localPosition;
+        float elapsed = 0f;
+        
+        while (elapsed < duration)
+        {
+            float x = Random.Range(-1f, 1f) * intensity;
+            float y = Random.Range(-1f, 1f) * intensity;
+            
+            mainCamera.transform.localPosition = originalPosition + new Vector3(x, y, 0);
+            
+            elapsed += Time.deltaTime;
+            yield return null;
+        }
+        
+        mainCamera.transform.localPosition = originalPosition;
+        Debug.Log($"카메라 쉐이크 완료 - 지속시간: {duration}초, 강도: {intensity}");
+    }
+    
     
 }

@@ -15,16 +15,13 @@ public class PillPickup : MonoBehaviour
         // 플레이어만
         if (!other.CompareTag("Player")) return;
 
-        // 1) 무적 모드 발동
-        var inv = other.GetComponent<InvincibilityItem>();
-        if (inv != null)
-            inv.ActivateInvincibility();
+        // 이미 비활성화된 상태면 중복 처리 방지
+        if (!gameObject.activeSelf) return;
 
-        // 2) UIManager 점수/아이콘 갱신
-        if (UIManager.Instance != null)
-            UIManager.Instance.CollectPill();
-
-        // 3) 자신(알약) 비활성화
-        gameObject.SetActive(false);
+        Debug.Log($"PillPickup: {gameObject.name} 충돌 감지 - InvincibilityItem에서 처리됨");
+        
+        // InvincibilityItem에서 모든 처리를 담당하므로 
+        // 여기서는 별도 처리를 하지 않고 비활성화만 수행
+        // (실제로는 InvincibilityItem에서 비활성화 처리됨)
     }
 }
