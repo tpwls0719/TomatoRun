@@ -50,4 +50,18 @@ public class Stage : MonoBehaviour
             NextStage();
         }
     }
+
+    public void ResetStage()
+{
+    timer = 0f;
+    stagePoint = 0;
+    stageIndex = 0;
+
+    for (int i = 0; i < Stages.Length; i++)
+    {
+        Stages[i].SetActive(i == 0); // 첫 스테이지만 활성화
+    }
+
+    Debug.Log("Stage 초기화 완료");
+}
 }

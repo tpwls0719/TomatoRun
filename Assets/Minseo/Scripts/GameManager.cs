@@ -245,6 +245,11 @@ public class GameManager : MonoBehaviour
                 activeSunLights[i].SetActive(false);
             }
         }
+        Stage stageManager = FindFirstObjectByType<Stage>();
+        if (stageManager != null)
+        {
+            //stageManager.ResetStage();
+        }
 
         Debug.Log("게임 오브젝트들 초기화 완료");
     }
@@ -341,19 +346,31 @@ public class GameManager : MonoBehaviour
     }
 
     private System.Collections.IEnumerator InitializeMainScene()
+{
+    yield return null; // 씬 로드 완료 대기
+
+    Debug.Log("메인 씬 로드됨 - 자동 초기화 시작");
+
+    isGameOver = false;
+    isGameCleared = false;
+    Time.timeScale = 1f;
+
+    ResetPlayerPosition();
+    ResetPlayerState();
+    ResetGameTime();
+    ResetGameObjects(); // 여기서 Stage도 초기화됨
+
+    // 👇 이 코드 추가로 확실히 Stage 초기화
+    Stage stageManager = FindFirstObjectByType<Stage>();
+    if (stageManager != null)
     {
-        yield return null; // 한 프레임 기다려서 씬이 완전히 로드되도록
-
-        Debug.Log("메인 씬 로드됨 - 자동 초기화 시작");
-
-        isGameOver = false;
-        isGameCleared = false;
-        Time.timeScale = 1f;
-
-        ResetPlayerPosition();
-        ResetPlayerState();
-        ResetGameTime();
-        ResetGameObjects();
+        stageManager.ResetStage();
+        Debug.Log("Stage 초기화 완료 (씬 로드 후)");
     }
+    else
+    {
+        Debug.LogWarning("Stage 오브젝트를 찾지 못했습니다");
+    }
+}
 
 }
